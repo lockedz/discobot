@@ -1,0 +1,25 @@
+{
+    "dir": {
+        "respostas" : "./txt/respostas",
+        "replies" : "./txt/reply_mention",
+        "idle_messages" : "./txt/idle_messages",
+        "help" : "./txt/help",
+        "token" : "./config/token",
+        "funcoes" : "./bin/funcoes",
+        "util" : "./bin/util",
+        "exp" : "./exp",
+        "log": {
+            "logdir"  : "./log",
+            "logfile" : "logs.log"
+        }
+    },
+    "preference": {
+        "tamanho_prefixo": "1",
+        "intervalo_inativo" : "2000",
+        "tempo_sleep" : "300000",
+        "tempo_interval_check" : "30"
+    },
+    "about": {
+        "version" : "0.5.8a"
+    }
+}

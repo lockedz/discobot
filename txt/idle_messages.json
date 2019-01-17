@@ -1,0 +1,10 @@
+{
+	"0" : "Provavalmente isso não funciona: intervalCheckCounter = ${intervalCheckCounter}",
+	"1" : "Propriedade 2, mas índice 1",
+	"2" : "Segue o jogo",
+	"3" : "Já no terceiro índice do array",
+	"4" : "FeelsGoodMan, 4o índice",
+	"5" : "FeelsAmazingMan, 6o índice mas 5o valor",
+	"6" : "array[6] = sou eu!",
+	"7" : "Último valor atual"
+}

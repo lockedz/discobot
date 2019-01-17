@@ -1,0 +1,15 @@
+{
+  "name": "discobot",
+  "version": "1.0.0",
+  "description": "Hell Yeah, dude",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Artur Müller",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "weather-js": "^2.0.0"
+  }
+}
