@@ -17,15 +17,17 @@ const DEFAULT_TEMPO_DND = CONFIG.preference.tempo_sleep;
 const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se o BOT for iniciado de outro local (ex: pelo .bat no desktop), o log.txt é criado no desktop
 
 // TODO: TRANSFORMAR EIGHTBALL E SONHOS EM ARQUIVOS STAND ALONE JSON
+// TODO: PRÓXIMO COMANDO: !addsonho "Peru" "Artur" vai adicionar - no que vai ser um arquivo json no futuro - a tupla especificada
 const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
     'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
+// TODO: deixar isso apenas como um objeto, exemplo: 'calor': 'cho', 'camaro': 'todaro';
 const SONHOS = [
-    'Dream on ONE',
-    'Here I came, sit to shit but only farted',
-	'Get me outta here', 
-    '????',
-	'This looks like hava...',
-    '... hava nice day lmaaaaoo gottem'
+    'Essa noite eu tive um sonho, eu sonhei com um pão, pau na bunda, pau na bunda, pau na bunda do João',
+    'Essa noite eu tive um sonho, eu sonhei com um camaro, pau na bunda, pau na bunda, pau na bunda do Todaro',
+	'Essa noite eu tive um sonho, eu sonhei com umas pulgas, pau na bunda, pau na bunda, pau na bunda do Lucas', 
+    'Essa noite eu tive um sonho, eu sonhei com um chamego, pau na bunda, pau na bunda, pau na bunda do Gallego',
+	'Essa noite eu tive um sonho, eu sonhei com um robô, pau na bunda, pau na bunda, pau na bunda do Cho',
+    'Essa noite eu... não tive um sonho!'
 ];
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 1; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages); // TODO: implementar isso aqui
@@ -76,6 +78,49 @@ BOT.on('ready', async () => {
 
 // FIXME:
 // QUAL A VANTAGEM DE TER UM CONFIG & MODULARIZAÇÃO SE, EM funcoes.js EU PRECISO IMPORTAR O util.js COM OUTRO CAMINHO "ABSOLUTO"?
+
+// ******--------*********
+//      TODO LIST:
+// ******--------*********
+// Fazer um comando "!since NICKNAME" que mostre há quanto tempo NICKNAME está online no canal
+
+// Provavelmente ajustar o config.json pra incluir "server/guild" e "channel". Por exemplo, pra ficar escutando a mudança de status/jogo de apenas um canal e não de todos que o bot encontra-se
+// talvez fazer uma 'lista' separada por, sei lá, vírgula, no proprio config pra incluir mais de um canal/guild
+
+// As constantes que utilizam "parseInt" devem lançar erros LOGO caso não consigam ser setadas; testar isso
+
+// No futuro, fazer O SISTEMA DE EXP com o package do mysql (mysql --save) e cada row (id, user, exp, level) e assim poder UPAR o camarada com um threshold
+
+// Fazer um !list <DIR> onde lista os arquivos do diretorio especificado.. talvez fazer uma lista predefinida de
+// diretórios que podem ser listados tipo '!list -a' lista varios DIRS que podem ser utilizados e 
+// '!list C:\users\artur\desktop' iria listar todos os arquivos desse diretório pra poder usar !send arquivo
+// CUIDADO, EM PASTAS COM MUITOS ARQUIVOS (TIPO DE MUSICA) VAI CAGAR PRA MANDAR AS MENSAGENS!
+
+// Fazer o bot responder ao mudar o status de JOGO falando, ao mudar o status, quanto tempo durou a jogatina no jogo X;
+
+
+// BOT.on('presenceUpdate', async (oldMember, newMember) => {
+//    // if (oldMember.presence === null || newMember.presence === null) return;
+// // FIXME:
+// /*
+// newMember as vezes volta como 'null' (quando sai de um jogo e vai pra nada)
+// como ver pra qual canal mandar a mensagem? Assumir que o bot só está em um? Mesmo assim, qual propriedade retorna um/o Channel?
+// Pelo jeito oldMember e newMember não são muito como pensei... não entendi ainda o sync/async desse evento
+// */
+// //console.log(`oldMember: ${oldMember} & newMember = ${newMember}`);
+// console.log(JSON.stringify(newMember.guild.channel, null, 4));
+// if (oldMember.presence.status === newMember.presence.status) { // se a mudança foi de JOGO e NÃO de presença
+//     if (!newMember.presence.game.equals(null)) { // foi de 'nada' pra algum jogo
+//     let aguilda = newMember;
+//         aguilda.channel.send(`${newMember} COMEÇOU a jogar ${newMember.presence.game.name}`);
+//     } else { // foi de algum jogo pra 'nada'
+//         console.log(`${newMember} PAROU de jogar ${oldMember.presence.game.name}`);
+//     }
+// } else {
+// console.log('caiu no else');}
+// });
+
+
 BOT.on('message', async (message) => {
 
     if (message.author.bot) return; // se msg vier de um/do BOT, sai e não faz nada
@@ -94,7 +139,7 @@ BOT.on('message', async (message) => {
         const command = args.shift().toLowerCase(); // Retorna a primeira "palavra" & ajusta o args (retirando a primeira palavra)
 		const lowerCaseContent = message.content.toString().toLowerCase();
 		
-	// FUNÇÕES DE COMANDO (funcoes.js)
+		// FUNÇÕES DE COMANDO (funcoes.js)
         // RESPONDE A COMANDOS (** PRIMEIRA PALAVRA ** COM UM "PREFIXO" DE TAMANHO "TAM_PREFIX" [CONFIG])
         // EX: !help            [TAM_PREFIX = 1 & PREFIXO = "!"]
         // EX: ++sonho lockedz  [TAM_PREFIX = 2 & PREFIXO = "++"]
@@ -120,6 +165,7 @@ BOT.on('message', async (message) => {
             case 'mirror':  FUNCOES.cmd_mirror(message, args, mirrorUser); break;
             case 'memo':    FUNCOES.cmd_memo(message, args, MEMO); break;
             case 'clima':   FUNCOES.cmd_clima(message, args); break;
+            case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
 			
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikachu': pikachu(message); break;
@@ -203,8 +249,8 @@ BOT.on('message', async (message) => {
             }
 			
         }
-		// DESABILITADO, POR ENQUANTO FIXME / TODO
-		// addExp(message, CONFIG.dir.exp, fatorExp, eXp); 
+		// DESABILITADO, POR ENQUANTO FIXME
+		    // addExp(message, CONFIG.dir.exp, fatorExp, eXp); 
 		
 		// ÁREA PARA QUANDO MENCIONAREM O NICK DO BOT
         if (message.isMentioned(BOT.user)) {
