@@ -355,5 +355,22 @@ module.exports = {
 		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'PT'); // Transforma de true para 'sim' e de false para 'não'
 		
 		message.channel.send(`-> Bot tem setInverval() ativado: ${boolStr}`);
-	}
+    },
+    cmd_cool: (message, args) => {
+        const LIMITE_MAXIMO_CARACTERES = 8; // Só para não crashar o bot caso seja uma mensagem muito longa
+
+        let str_acumulador = str_completa = str_args = '';
+        let tam_total_mensagem = 0;
+        str_args = args.join(' ');
+        tam_total_mensagem = str_args.length || 0;
+
+        if (tam_total_mensagem === 0 || tam_total_mensagem > LIMITE_MAXIMO_CARACTERES) return;
+
+        for (let i = 0; i < tam_total_mensagem; i++) {
+            str_acumulador += str_args.charAt(i);
+            str_completa += str_acumulador + '\n';
+        }
+
+        message.channel.send('\u200B\n' + str_completa);
+    }
 };
