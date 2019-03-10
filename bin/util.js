@@ -1,4 +1,4 @@
-fs = require('fs');
+const fs = require('fs');
 
 module.exports = {
     normalizeDigits: function(d) {
@@ -14,7 +14,7 @@ module.exports = {
 
         return day + '/' + month + '/' + year;
     },
-    doLog: function(message, pathFile, moreInfo = '') {
+    doLog: function(message, pathFile, moreInfo = '') { // FIXME: Existe mesmo a necessidade de incluir pathFile como argument?
 		// Escreve (ou cria, se não existir) arquivo logando o comando utilizado pelo usuário
         let timeNow = new Date().toLocaleTimeString();
         let fullDateAndTime = this.fullDate() + '|' + timeNow;
@@ -35,8 +35,8 @@ module.exports = {
         console.log(txtLog.slice(0, txtLog.length-1));
         return;
     },
-    ficarInutil: function(inutil, DESCANSO) { // inutil : Object | DESCANSO : const INT
-	// Faz o bot ficar inativo por um tempo, evitando spam de comandos
+    ficarInutil: function(inutil, DESCANSO) { // inutil : Object | DESCANSO : Integer
+	    // Faz o bot ficar inativo por um tempo, evitando spam de comandos
         inutil.status = true;
         try {
             inutil.handler = setTimeout(() => { inutil.status = false; }, DESCANSO);
@@ -85,14 +85,13 @@ module.exports = {
 
         return tmpStr;
     },
-    pickRandomProperty: (obj) => {
+    pickRandomProperty: (obj) => { // Thanks StackOverflow
 		// IN: 	Object
 		// OUT:	ONE OF THE OBJ PROPERTIES INDEX (RANDOM)
         let result = null;
         let count = 0;
 
         for (let prop in obj) {
-        //console.log(`Propriedade: ${prop} | Usando como array: ${obj[prop]}`);
             if (Math.random() < 1/++count) 
                result = prop;
         }
