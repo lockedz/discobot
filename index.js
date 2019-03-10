@@ -16,21 +16,17 @@ const DESCANSO =        parseInt(CONFIG.preference.intervalo_inativo); // TEMPO,
 const DEFAULT_TEMPO_DND = CONFIG.preference.tempo_sleep;
 const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se o BOT for iniciado de outro local (ex: pelo .bat no desktop), o log.txt é criado no desktop
 
-// TODO: TRANSFORMAR EIGHTBALL E SONHOS EM ARQUIVOS STAND ALONE JSON
-// TODO: PRÓXIMO COMANDO: !addsonho "Peru" "Artur" vai adicionar - no que vai ser um arquivo json no futuro - a tupla especificada
+// TODO: ON ERROR DEVE RESETAR TUDO PARA UM ESTADO INICIAL;
+// Resetar todas as variáveis na mão? Se eu fizer uma função init() não preciso explicitar a inicialização das variáveis aqui no começo... vale a pena?
+
 const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
     'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
-// TODO: deixar isso apenas como um objeto, exemplo: 'calor': 'cho', 'camaro': 'todaro';
+
 const SONHOS = [
-    'Essa noite eu tive um sonho, eu sonhei com um pão, pau na bunda, pau na bunda, pau na bunda do João',
-    'Essa noite eu tive um sonho, eu sonhei com um camaro, pau na bunda, pau na bunda, pau na bunda do Todaro',
-	'Essa noite eu tive um sonho, eu sonhei com umas pulgas, pau na bunda, pau na bunda, pau na bunda do Lucas', 
-    'Essa noite eu tive um sonho, eu sonhei com um chamego, pau na bunda, pau na bunda, pau na bunda do Gallego',
-	'Essa noite eu tive um sonho, eu sonhei com um robô, pau na bunda, pau na bunda, pau na bunda do Cho',
-    'Essa noite eu... não tive um sonho!'
+
 ];
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 1; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
-const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages); // TODO: implementar isso aqui
+const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
 let intervalCheckCounter = 0;
 let botMandaMensagensAntiIdle = {flag: false};
@@ -166,6 +162,8 @@ BOT.on('message', async (message) => {
             case 'memo':    FUNCOES.cmd_memo(message, args, MEMO); break;
             case 'clima':   FUNCOES.cmd_clima(message, args); break;
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
+            case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
+            case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
 			
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikachu': pikachu(message); break;
@@ -250,7 +248,7 @@ BOT.on('message', async (message) => {
 			
         }
 		// DESABILITADO, POR ENQUANTO FIXME
-		    // addExp(message, CONFIG.dir.exp, fatorExp, eXp); 
+		// addExp(message, CONFIG.dir.exp, fatorExp, eXp); 
 		
 		// ÁREA PARA QUANDO MENCIONAREM O NICK DO BOT
         if (message.isMentioned(BOT.user)) {
