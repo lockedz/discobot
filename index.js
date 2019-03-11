@@ -16,28 +16,23 @@ const DESCANSO =        parseInt(CONFIG.preference.intervalo_inativo); // TEMPO,
 const DEFAULT_TEMPO_DND = CONFIG.preference.tempo_sleep;
 const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se o BOT for iniciado de outro local (ex: pelo .bat no desktop), o log.txt é criado no desktop
 
-// TODO: ON ERROR DEVE RESETAR TUDO PARA UM ESTADO INICIAL;
-// Resetar todas as variáveis na mão? Se eu fizer uma função init() não preciso explicitar a inicialização das variáveis aqui no começo... vale a pena?
-
 const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
     'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
 
-const SONHOS = [
-
-];
+const SONHOS = [];
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 1; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
-let intervalCheckCounter = 0;
-let botMandaMensagensAntiIdle = {flag: false};
-let allowDelete = {flag: true};
-let inutil = {handler: null, status: null};
-let eXp = {up:0};
-let timerGlobals = {time: 0, tempo: 0}; // Utilizado em cmd_timer()
-let timeoutHandler = {timerHandler:null, botHandler: null, startCommand: null, intervalCheck: null}; // instanciado como objeto pra poder ser passado por referência para(s) a(s) função(ões)
-let botStatus = {status:'online'}; // obj (passa-se por referência)
-let mirrorUser = {id:null, status:false, style: null}; // id do usuário na guild | status se está on [o mirror] (true) ou não (false) | style qual estilo (função) pro texto
-let MEMO = {byUser: null, content:null, date:null};
+let intervalCheckCounter;
+let botMandaMensagensAntiIdle = {};
+let allowDelete = {};
+let inutil = {};
+let eXp = {};
+let timerGlobals = {}; // Utilizado em cmd_timer()
+let timeoutHandler = {}; // instanciado como objeto pra poder ser passado por referência para(s) a(s) função(ões)
+let botStatus = {}; // obj (passa-se por referência)
+let mirrorUser = {}; // id do usuário na guild | status se está on [o mirror] (true) ou não (false) | style qual estilo (função) pro texto
+let MEMO = {};
 
 
 /* *****************
@@ -46,7 +41,23 @@ let MEMO = {byUser: null, content:null, date:null};
 // TODO: onde tiver hardcoded meu nick, fazer com que seja por "roles" ?
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
 
+const init = () => {
+    intervalCheckCounter = 0;
+    botMandaMensagensAntiIdle = {flag: false};
+    allowDelete = {flag: true};
+    inutil = {handler: null, status: null};
+    eXp = {up:0};
+    timerGlobals = {time: 0, tempo: 0};
+    timeoutHandler = {timerHandler:null, botHandler: null, startCommand: null, intervalCheck: null};
+    botStatus = {status:'online'};
+    mirrorUser = {id:null, status:false, style: null};
+    MEMO = {byUser: null, content:null, date:null};
+}
+
+
 BOT.on('ready', async () => {
+    init();
+
     const timestampInicio = new Date().toLocaleTimeString();
     console.log(`[${timestampInicio}] ${BOT.user.username} reporting for duty, bro [servers: ${BOT.guilds.size}]`);
 	
@@ -346,7 +357,6 @@ function addExp(message, _expDir, expRate = 1, eXp) {
 } // FIXME: de síncrono -> assíncrono OU apagar e fazer com mysql
 
 
-
 BOT.login(TOKEN.token);
 
 
@@ -354,6 +364,7 @@ BOT.on('error', (err) => {
 	let timeNow = new Date().toLocaleTimeString();
 	
     console.log(`-- [${timeNow}] Algum erro aconteceu: ${err.message}`);
+    //process.exit(1); // TODO: TEST THIS ON ERROR
 });
 
 
