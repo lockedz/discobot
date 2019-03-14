@@ -350,18 +350,26 @@ module.exports = {
                 }
         );
     },
-	cmd_antiIdle: (message, botMandaMensagensAntiIdle) => { // FIXME: Colocar no index.js ?
-		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag;
+	cmd_antiIdle: (message, botMandaMensagensAntiIdle, interval_server_messages) => { // FIXME: Colocar no index.js ?
+		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag; // por ser um Object, a referência é atualizada "globalmente"
 		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'PT'); // Transforma de true para 'sim' e de false para 'não'
 		
-		message.channel.send(`-> Bot tem setInverval() ativado: ${boolStr}`);
+		message.channel.send(`-> Bot tem setInverval() ativado: ${boolStr}, a cada ${interval_server_messages} minutos`);
     },
     cmd_cool: (message, args) => {
-        const LIMITE_MAXIMO_CARACTERES = 8; // Só para não crashar o bot caso seja uma mensagem muito longa
+        let LIMITE_MAXIMO_CARACTERES = 10;
+        let possuiSenha = false;
+
+        if (args.toString().substring(0,3) === 'pei') possuiSenha = true; // Só para não crashar o bot caso seja uma mensagem muito longa (se nao tiver "senha", so pra testes)
 
         let str_acumulador = str_completa = str_args = '';
         let tam_total_mensagem = 0;
         str_args = args.join(' ');
+        if (possuiSenha) {
+            str_args = str_args.slice(3);
+            LIMITE_MAXIMO_CARACTERES = 1024;
+        }
+
         tam_total_mensagem = str_args.length || 0;
 
         if (tam_total_mensagem === 0 || tam_total_mensagem > LIMITE_MAXIMO_CARACTERES) return;
@@ -372,5 +380,95 @@ module.exports = {
         }
 
         message.channel.send('\u200B\n' + str_completa);
+    },
+    cmd_tree: (message, args) => {
+		const EVEN_MAX = 34; // Se tiver mais de 34 o tamanho total da mensagem excede 2000caracteres
+        let zeroWidth = '\u200B';
+        //let isOdd = false;
+        let hasOption = false; 
+        let completeString = completeStringAdjusted = acumulatorString = argsAsString = '';
+        let argsStringSize = initialSpaces = howManyLevels = charPos = 0;
+
+        if (args.length > 0) {
+            argsAsString = args.join(' ');
+            if (argsAsString.substring(0, 5) === '-mono') { // Se tiver a opção; se usa como !tree -mono [args] ou !tree [args]
+                hasOption = true;
+                argsAsString = argsAsString.slice(6); // Ajusta para retirar o '-mono ' do texto
+            }
+            argsStringSize = argsAsString.length;
+            
+            if (argsStringSize % 2 !== 0) {
+                isOdd = true;
+            } else {
+                isOdd = false;
+            }
+        } else { 
+            return; // Se não houver argumentos NÃO faz nada
+        }
+
+        if (isOdd) {
+            initialSpaces = Math.floor(argsStringSize / 2);
+            howManyLevels = Math.ceil(argsStringSize / 2);
+
+            for (let i = 1; i <= howManyLevels; i++) {
+                acumulatorString = ' '.repeat(initialSpaces) + '' + argsAsString.substring(0, charPos+1);
+                completeString += acumulatorString + '\n';
+                charPos += 2;
+                initialSpaces -= 1;
+            }
+        } else { // by Cho
+			if (argsStringSize > EVEN_MAX) {
+				message.channel.send(`A mensagem iria exceder 2000 caracteres, no can do it.`);
+				return;
+			} // Se exceder o tamanho máximo
+		
+            initialSpaces = argsStringSize;
+    
+            for (let i = 1; i <= argsStringSize; i++) {
+                acumulatorString = ' '.repeat(initialSpaces);
+                
+                for (let j = 0; j <= charPos; j++) {
+                    acumulatorString = acumulatorString + argsAsString.substring(j, j + 1);
+                    if (j < charPos) acumulatorString += ' ';
+                }
+                
+                completeString += acumulatorString + '\n';
+                charPos++;
+                initialSpaces--;
+            }
+        }
+
+        completeStringAdjusted = (hasOption ? '\`\`\`'+ completeString + '\`\`\`' : zeroWidth + '\n' + completeString);
+		
+		// Equacao (FIXME) que calcula o tamanho de caracteres dada N = Entrada.length
+		let O = function(n) {
+			return n*n + n*n/2 + n*2-1;
+		}
+		let tamanhoCalculado = O(argsStringSize);
+		
+		message.channel.send(`${completeStringAdjusted}`);
+        //message.channel.send(`${completeStringAdjusted} tamanho: ${completeStringAdjusted.length} | tamanho calculado: ${ababua}`);
+    },
+    cmd_mktree: (message, args) => { // !mktree tamanho_da_tree <EMOJI>
+        // FIXME: Emojis não ficam formatados corretamente, se <EMOJI> for apenas um char qualquer, a saída é formatada ok
+        if (args.length !== 2) return;
+
+        let acumulatorString = completeString = adjustedCompleteString = '';
+        let howManyLevels = parseInt(args[0]) || 1;
+        let initialSpaces = parseInt(howManyLevels+1) || 1;
+        let emojiID = args[1];
+
+        for (let i = 1; i <= howManyLevels; i++) {
+            acumulatorString = ' '.repeat(initialSpaces);
+            for (let j = 1; j <= i; j++) {
+                acumulatorString += emojiID + ' ';
+            }
+            completeString += acumulatorString.slice(0, -1) + '\n'; // slice usado para retirar o último espaço de cada linha
+            initialSpaces -= 1;
+        }
+
+        adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
+        message.channel.send(`${adjustedCompleteString}`);
+        //console.log(adjustedCompleteString);
     }
 };

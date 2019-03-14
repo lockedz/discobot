@@ -51,7 +51,8 @@ module.exports = {
     },
     backToWork: function(msg, sts, texto, BOT, botStatus, timeoutHandler) {
         if (timeoutHandler.botHandler) {
-            timeoutHandler.botHandler = null;
+            //timeoutHandler.botHandler = null;
+            clearTimeout(timeoutHandler.botHandler);
             this.setStatusBOT(sts, BOT, botStatus);
             msg.channel.send(texto);
         }
