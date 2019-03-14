@@ -19,8 +19,15 @@ const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se 
 const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
     'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
 
-const SONHOS = [];
-const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 1; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
+const SONHOS = [
+    'Essa noite eu tive um sonho, eu sonhei com um pão, pau na bunda, pau na bunda, pau na bunda do João',
+    'Essa noite eu tive um sonho, eu sonhei com um camaro, pau na bunda, pau na bunda, pau na bunda do Todaro',
+	'Essa noite eu tive um sonho, eu sonhei com umas pulgas, pau na bunda, pau na bunda, pau na bunda do Lucas', 
+    'Essa noite eu tive um sonho, eu sonhei com um chamego, pau na bunda, pau na bunda, pau na bunda do Gallego',
+	'Essa noite eu tive um sonho, eu sonhei com um robô, pau na bunda, pau na bunda, pau na bunda do Cho',
+    'Essa noite eu... não tive um sonho!'
+];
+const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 60; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
 let intervalCheckCounter;
@@ -38,6 +45,8 @@ let MEMO = {};
 /* *****************
 * COMEÇO DO CÓDIGO *
 ********************/
+// TODO: as variáveis consideradas de "settings" devem ser escritas em um arquivo de configurações e recuperadas do mesmo em toda nova session (ex: botMandaMensagensAntiIdle, mirrorUser)
+// TODO: No comando de antiidle (cmd_antiIdle) fazer uma algoritmo pra guardar quais indices ja foram 'falados' e não repetir o mesmo random até TODOS os indices terem ido uma vez
 // TODO: onde tiver hardcoded meu nick, fazer com que seja por "roles" ?
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
 
@@ -56,6 +65,7 @@ const init = () => {
 
 
 BOT.on('ready', async () => {
+
     init();
 
     const timestampInicio = new Date().toLocaleTimeString();
@@ -69,12 +79,18 @@ BOT.on('ready', async () => {
     // ATENÇÃO: ESSE INTERVAL VAI FICAR RODANDO **SEMPRE** COM INTERVAL_SERVER_MESSAGES MINUTOS
     // MELHOR FORMA DE PENSAR NISSO É O BOT "CHECANDO STATUS DE QUALQUER COISA A CADA X MINUTOS" E FAZER AÇÕES (CASO NECESSÁRIO) DE ACORDO
     // *****
+    const sendIdleMessages = (botObject, idleMessagesObject) => {
+        let feelsgoodmanChannel = botObject.guilds.get('375474831526985738').channels.get('375474831531180033');
+
+        intervalCheckCounter++; // variável global de "controle" contando quantas vezes o interval rodou
+
+        //feelsgoodmanChannel.send(`Bip, bop: idle número ${intervalCheckCounter} em ${INTERVAL_SERVER_MESSAGES} minutos.`);
+        feelsgoodmanChannel.send(idleMessagesObject[UTIL.pickRandomProperty(idleMessagesObject)]);
+    }
+    
     timeoutHandler.intervalCheck = setInterval(() => {
         if (botMandaMensagensAntiIdle.flag) {
-            let feelsgoodmanChannel = BOT.guilds.get('375474831526985738').channels.get('375474831531180033');
-            intervalCheckCounter++; // variável global de "controle" contando quantas vezes o interval rodou
-            //feelsgoodmanChannel.send(`Bip, bop: idle número ${intervalCheckCounter} em ${INTERVAL_SERVER_MESSAGES} minutos.`);
-            feelsgoodmanChannel.send(IDLE_MESSAGES_OBJECT[UTIL.pickRandomProperty(IDLE_MESSAGES_OBJECT)]);
+            sendIdleMessages(BOT, IDLE_MESSAGES_OBJECT);
         }
     }, (INTERVAL_SERVER_MESSAGES * 60000)); // tempo ajustado para MINUTOS
 
@@ -181,7 +197,7 @@ BOT.on('message', async (message) => {
 			
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
-			case 'antiidle':	FUNCOES.cmd_antiIdle(message, botMandaMensagensAntiIdle); break;
+			case 'antiidle':	FUNCOES.cmd_antiIdle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
 
             default:
                 isCommandUtilized = false;
