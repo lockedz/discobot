@@ -162,10 +162,12 @@ module.exports = {
     cmd_send: function(message, args) {
         let file, id_emoji;
     
-        if (args[0]) { // Mandar nada (sem argumentos) sai da função
+        if (args[0] !== undefined) { // Mandar nada (sem argumentos) sai da função
             file = args.join(' ');
         }
-        else return;
+        else {
+            return;
+        }
     
         // Envia o arquivo no canal atual
         message.channel.send({
@@ -180,7 +182,7 @@ module.exports = {
         })
         .catch((e) => {
             console.error;
-            message.channel.send(`O arquivo ** ${file} ** não existe.`);
+            //message.channel.send(`O arquivo ** ${file} ** não existe.`); // to send a message to the channel as well as reacting seems overkill
             id_emoji = '❓';
             message.react(id_emoji).catch(e => {console.log('Could not react! [send file/não encontrado]')});
         });
