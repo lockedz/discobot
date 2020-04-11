@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const fs =      require('fs');
 const UTIL =    require('../bin/util');
 const weather = require('weather-js');
+const { exchangeRates } = require('exchange-rates-api');
 
 module.exports = {
     cmd_help: function(message, HELP_LISTA, TAM_PREFIX) {
@@ -95,7 +96,12 @@ module.exports = {
         }
         if (args.length >= 2 && !isNaN(eval(args[0]))) { // USANDO "EVAL". QUALQUER PROBLEMA, RETIRAR ESSE EVAL!!
             if (!timeoutHandler.timerHandler) { // Se NÃO existe um timer ativo, vamos dar sequência à rotina
-                timerGlobals.tempo = eval(args[0]); if (timerGlobals.tempo <= 0) { timerGlobals.tempo = 0; }
+                timerGlobals.tempo = eval(args[0]);
+                
+                if (timerGlobals.tempo <= 0) {
+                    timerGlobals.tempo = 0;
+                }
+
                 let texto = args.slice(1).join(' ');
 
                 message.channel.send(`Timer iniciado: **${UTIL.normalizeDigits(timerGlobals.tempo)}**sec para *${texto}*`);
@@ -162,11 +168,11 @@ module.exports = {
     cmd_send: function(message, args) {
         let file, id_emoji;
     
-        if (args[0] !== undefined) { // Mandar nada (sem argumentos) sai da função
+        if (args[0] !== undefined) {
             file = args.join(' ');
         }
-        else {
-            return;
+        else { // Mandar nada (sem argumentos) sai da função
+			return;
         }
     
         // Envia o arquivo no canal atual
@@ -430,7 +436,7 @@ module.exports = {
                 acumulatorString = ' '.repeat(initialSpaces);
                 
                 for (let j = 0; j <= charPos; j++) {
-                    acumulatorString = acumulatorString + argsAsString.substring(j, j + 1);
+                    acumulatorString += argsAsString.substring(j, j + 1);
                     if (j < charPos) acumulatorString += ' ';
                 }
                 
@@ -472,5 +478,15 @@ module.exports = {
         adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
         message.channel.send(`${adjustedCompleteString}`);
         //console.log(adjustedCompleteString);
+    },
+    cmd_exchangeRate: async () => {
+        // Pass an YYYY-MM-DD (ISO 8601) string
+        await exchangeRates().at('2018-09-01').fetch();
+    
+        // Pass another string
+        await exchangeRates().at('September 1, 2018').fetch();
+    
+        // Pass a Date object
+        await exchangeRates().at(new Date(2019, 8, 1)).fetch();
     }
 };
