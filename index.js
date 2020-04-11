@@ -27,6 +27,7 @@ const SONHOS = [
 	'Essa noite eu tive um sonho, eu sonhei com um robô, pau na bunda, pau na bunda, pau na bunda do Cho',
     'Essa noite eu... não tive um sonho!'
 ];
+
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 60; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
@@ -191,6 +192,7 @@ BOT.on('message', async (message) => {
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
+            case 'exchangerate':    FUNCOES.cmd_exchangeRate(); break; // 11/04/2020 TODO: TEST!
 			
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikachu': pikachu(message); break;
@@ -199,6 +201,7 @@ BOT.on('message', async (message) => {
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
 			case 'antiidle':	FUNCOES.cmd_antiIdle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
 
+            // when it's plain text with no commands fetched from "funcoes.js"
             default:
                 isCommandUtilized = false;
                 break;
@@ -216,6 +219,8 @@ BOT.on('message', async (message) => {
             case 'ez':			react_message(message, '<:ez:383053763776217098> Clap'); break;
             case 'cho safado':  react_message(message, 'Essa fada!'); break;
             case 'omae wa mou shindeiru': react_message(message, '_NANI_?!'); break;
+            case 'opa':         react_message(message, 'Epa, quem disse opa?'); break;
+            case 'epa':         react_message(message, 'Opa, quem disse epa?'); break;
 
             default:
                 break;
