@@ -4,7 +4,6 @@ const Discord = require('discord.js');
 const fs =      require('fs');
 const UTIL =    require('../bin/util');
 const weather = require('weather-js');
-const { exchangeRates } = require('exchange-rates-api');
 
 module.exports = {
     cmd_help: function(message, HELP_LISTA, TAM_PREFIX) {
@@ -169,7 +168,7 @@ module.exports = {
         let file, id_emoji;
     
         if (args[0] !== undefined) {
-            file = args.join(' ');
+            file = args.join(' ').replace(/["']/g, "").toString();
         }
         else { // Mandar nada (sem argumentos) sai da função
 			return;
@@ -179,7 +178,7 @@ module.exports = {
         message.channel.send({
             files: [{
                 attachment: file,
-                name: file.toString()
+                name: file
             }]
         })
         .then(() => {
@@ -234,7 +233,7 @@ module.exports = {
     },
     cmd_eval: (message, args) => {
         if (args.length <= 0) return;
-        if (message.author.id !== '375474036022575104') {
+        if (message.author.id !== '375474036022575104' && message.author.id !== '717369666137358367') {
 			message.react('⛔').catch(e => {console.log('could not react with emoji: [eval area] '+e)});
 			return; // se não for EU (lockedz), não execute
 		}
@@ -275,25 +274,31 @@ module.exports = {
         }
     },
     cmd_mirror: (message, args, mirrorUser) => {
-        if (args.length < 1) return;
+        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {}) return;
 
-        if (args[0] === 'off') {
+        let iWhichArg = (args.length > 1 ? 1 : 0);
+
+        if (args[iWhichArg] === '-off') {
             mirrorUser.id = null;
             mirrorUser.status = false;
             mirrorUser.style = null;
+            mirrorUser.name = null;
+
             return;
-        } else if (!mirrorUser.status && args.length > 1) { // se não existir nenhum mirror ativo E tiver argumento [0] & usuario [1]
-			mirrorUser.style = args[0].substring(1, args[0].length);
+        } else if (!mirrorUser.status) { // se não existir nenhum mirror ativo E tiver argumento [0] & usuario [1]
+            mirrorUser.style = (iWhichArg === 1 ? args[iWhichArg-1].substring(1, args[iWhichArg-1].length) : 'default');
         }
 
         //console.log(message.guild.member(message.mentions.users.first()).id); console.log(message.guild.members.get(args[0]));
-        let lookForUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
-        if (!lookForUser) return;
+        let lookForUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[iWhichArg]);
+        if (!lookForUser) { return; }
         
         mirrorUser.id = lookForUser.id;
+        mirrorUser.name = lookForUser.user.username;
         mirrorUser.status = true;
 
         console.log(`-- Mirroing = ${mirrorUser.id} (${lookForUser.user.username})`);
+
         return;
     },
     cmd_memo: (message, args, MEMO) => {
@@ -478,15 +483,5 @@ module.exports = {
         adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
         message.channel.send(`${adjustedCompleteString}`);
         //console.log(adjustedCompleteString);
-    },
-    cmd_exchangeRate: async () => {
-        // Pass an YYYY-MM-DD (ISO 8601) string
-        await exchangeRates().at('2018-09-01').fetch();
-    
-        // Pass another string
-        await exchangeRates().at('September 1, 2018').fetch();
-    
-        // Pass a Date object
-        await exchangeRates().at(new Date(2019, 8, 1)).fetch();
     }
 };
