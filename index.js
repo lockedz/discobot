@@ -27,7 +27,6 @@ const SONHOS = [
 	'Essa noite eu tive um sonho, eu sonhei com um robô, pau na bunda, pau na bunda, pau na bunda do Cho',
     'Essa noite eu... não tive um sonho!'
 ];
-
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 60; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
@@ -60,7 +59,7 @@ const init = () => {
     timerGlobals = {time: 0, tempo: 0};
     timeoutHandler = {timerHandler:null, botHandler: null, startCommand: null, intervalCheck: null};
     botStatus = {status:'online'};
-    mirrorUser = {id:null, status:false, style: null};
+    mirrorUser = {id:null, status:false, style: null, name: null};
     MEMO = {byUser: null, content:null, date:null};
 }
 
@@ -192,7 +191,6 @@ BOT.on('message', async (message) => {
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
-            case 'exchangerate':    FUNCOES.cmd_exchangeRate(); break; // 11/04/2020 TODO: TEST!
 			
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikachu': pikachu(message); break;
@@ -260,21 +258,24 @@ BOT.on('message', async (message) => {
 
 			// *********
 			// MIRROING *
-			// *********
-            if (mirrorUser.status === true) {
+            // *********
+            if (mirrorUser === 'undefined' || mirrorUser === {}) return;
+            else if (mirrorUser.status === true) {
                 if (message.author.id === mirrorUser.id) {
+                    let sBeforeMirror = `${mirrorUser.name} says: `;
                     switch (mirrorUser.style) {
                         case 'leet':
-                            message.channel.send(UTIL.textToLeet(message.content));
+                            message.channel.send(`${sBeforeMirror}`+UTIL.textToLeet(`${message.content}`));
                             break;
                         case 'back':
-                            message.channel.send(UTIL.textBackwards(message.content));
+                            message.channel.send(`${sBeforeMirror}`+UTIL.textBackwards(`${message.content}`));
                             break;
 
                         default: // Sem "efeito"/argumento
-                            message.channel.send(message.content);
+                            message.channel.send(`${sBeforeMirror} ${message.content}`);
                             break;
                     }
+                    message.delete().catch(O_o => {});
                 }
             }
 			
