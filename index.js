@@ -1,3 +1,4 @@
+const { throws } = require('assert');
 const Discord =         require('discord.js');
 const fs =              require('fs');
 const CONFIG =          require('./config/config');
@@ -9,7 +10,10 @@ const UTIL =            require(CONFIG.dir.util);
 const FUNCOES =         require(CONFIG.dir.funcoes);
 
 const BOT =             new Discord.Client();
+// TOOD: FAZER UM "MELHOR DE TRÊS" COM O !COINFLIP
 
+
+    
 const BOT_VERSION =     CONFIG.about.version; // atualizado 10/09/2018
 const TAM_PREFIX =      parseInt(CONFIG.preference.tamanho_prefixo); // TAMANHO DO 'CHAR' DE PREFIXO PARA COMANDOS (1: '!' OU '+')
 const DESCANSO =        parseInt(CONFIG.preference.intervalo_inativo); // TEMPO, EM MILESEGUNDOS, PARA O BOT FICAR SEM RESPONDER (EVITA SPAM DE COMANDOS)
@@ -18,6 +22,7 @@ const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se 
 
 const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
     'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
+const GRAPHICS_ACCENTUATION = ['.','!','?',',',';'];
 
 const SONHOS = [
     'Essa noite eu tive um sonho, eu sonhei com um pão, pau na bunda, pau na bunda, pau na bunda do João',
@@ -28,6 +33,7 @@ const SONHOS = [
     'Essa noite eu... não tive um sonho!'
 ];
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 60; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
+
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
 let intervalCheckCounter;
@@ -188,6 +194,7 @@ BOT.on('message', async (message) => {
             case 'mirror':  FUNCOES.cmd_mirror(message, args, mirrorUser); break;
             case 'memo':    FUNCOES.cmd_memo(message, args, MEMO); break;
             case 'clima':   FUNCOES.cmd_clima(message, args); break;
+            case 'howto':   FUNCOES.cmd_howTo(message, args); break;
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
@@ -243,7 +250,7 @@ BOT.on('message', async (message) => {
                 tmpTxt = ALL_MESSAGE[x].toString().toLowerCase();
                 if (x === allMsgLen-1) { // Caso seja a última palavra, permitir que ela venha seguida de ponto gráfico ("?", ".", etc)
                     tmp = tmpTxt.substring(0, tmpTxt.length-1);
-                    if (RESPONSE_OBJECT[tmp]) {
+                    if (RESPONSE_OBJECT[tmp] && GRAPHICS_ACCENTUATION.includes(tmpTxt.slice(-1))) { // ONLY IF THE NEXT CHAR IS IN GRAPHICS_ACCENTUATION
                         message.channel.send(RESPONSE_OBJECT[tmp]);
                         return; // se o bot respondeu algo, não considerar que foi um comando mandado pelo usuario. Responde e finaliza
                         //break;
@@ -262,17 +269,21 @@ BOT.on('message', async (message) => {
             if (mirrorUser === 'undefined' || mirrorUser === {}) return;
             else if (mirrorUser.status === true) {
                 if (message.author.id === mirrorUser.id) {
-                    let sBeforeMirror = `${mirrorUser.name} says: `;
+                    let sBeforeMirror = `**${mirrorUser.name}** says: `;
+                    let sMessageCntn = `_${message.content}_`;
                     switch (mirrorUser.style) {
                         case 'leet':
-                            message.channel.send(`${sBeforeMirror}`+UTIL.textToLeet(`${message.content}`));
+                            message.channel.send(`${sBeforeMirror}`+UTIL.textToLeet(`${sMessageCntn}`));
                             break;
                         case 'back':
-                            message.channel.send(`${sBeforeMirror}`+UTIL.textBackwards(`${message.content}`));
+                            message.channel.send(`${sBeforeMirror}`+UTIL.textBackwards(`${sMessageCntn}`));
+                            break;
+                        case 'hardmode':
+                            message.channel.send(`${sBeforeMirror}`+UTIL.textToHardmode(`${sMessageCntn}`));
                             break;
 
                         default: // Sem "efeito"/argumento
-                            message.channel.send(`${sBeforeMirror} ${message.content}`);
+                            message.channel.send(`${sBeforeMirror} ${sMessageCntn}`);
                             break;
                     }
                     message.delete().catch(O_o => {});
