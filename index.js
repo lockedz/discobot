@@ -8,6 +8,7 @@ const RESPONSE_OBJECT = require(CONFIG.dir.respostas); // Deixar todo elemento[0
 const BOT_REPLY_MENTION = require(CONFIG.dir.replies);
 const UTIL =            require(CONFIG.dir.util);
 const FUNCOES =         require(CONFIG.dir.funcoes);
+const MUSIC =           require(CONFIG.dir.music);
 
 const BOT =             new Discord.Client();
 // TOOD: FAZER UM "MELHOR DE TRÊS" COM O !COINFLIP
@@ -20,8 +21,8 @@ const DESCANSO =        parseInt(CONFIG.preference.intervalo_inativo); // TEMPO,
 const DEFAULT_TEMPO_DND = CONFIG.preference.tempo_sleep;
 const pathFile = CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile; // FIXME: se o BOT for iniciado de outro local (ex: pelo .bat no desktop), o log.txt é criado no desktop
 
-const EIGHTBALL = ['sim','não','talvez','não me importo','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
-    'com certeza','nunca','jamais','sempre', 'só sei que nada sei', 'pang la sia peipei', 'a resposta é 42', 'vai estudar, desgraça', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
+const EIGHTBALL = ['sim','não','talvez','fuckriuuuu','what?','hell yeah','hoje, amanhã e sempre','...','pode ser que sim, pode ser que não',
+    'com certeza','nunca','jamais','sempre', 'as estrelas apontam para o sim', 'vou pensar depois te digo'];
 const GRAPHICS_ACCENTUATION = ['.','!','?',',',';'];
 
 const SONHOS = [
@@ -36,6 +37,7 @@ const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check
 
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
+let queue;
 let intervalCheckCounter;
 let botMandaMensagensAntiIdle = {};
 let allowDelete = {};
@@ -57,6 +59,8 @@ let MEMO = {};
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
 
 const init = () => {
+    queue = new Map();
+    serverQueue = '';
     intervalCheckCounter = 0;
     botMandaMensagensAntiIdle = {flag: false};
     allowDelete = {flag: true};
@@ -103,7 +107,9 @@ BOT.on('ready', async () => {
 	//console.log(BOT.guilds.get('375474831526985738').channels.get('375474831531180033'));
 });
 
-
+// MUSIC AREA
+//const serverQueue = (queue === "undefined") ? "" : queue.get(message.guild.id);
+// END OF MUSIC AREA
 
 // FIXME:
 // QUAL A VANTAGEM DE TER UM CONFIG & MODULARIZAÇÃO SE, EM funcoes.js EU PRECISO IMPORTAR O util.js COM OUTRO CAMINHO "ABSOLUTO"?
@@ -198,10 +204,13 @@ BOT.on('message', async (message) => {
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
-			
+            //case 'testOne': FUNCOES.cmd_testOne(message,args); break; // TODO
+            // YOUTUBE SONGS FUNCTIONS // FIXME TODO
+            // case 'playtubao': MUSIC.execute(message, args, serverQueue); break;
+            // case 'skip':    MUSIC.skip(message, serverQueue); break;
+            // case 'stop':    MUSIC.stop(message, serverQueue); break;
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikachu': pikachu(message); break;
-			
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
 			case 'antiidle':	FUNCOES.cmd_antiIdle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
@@ -226,6 +235,9 @@ BOT.on('message', async (message) => {
             case 'omae wa mou shindeiru': react_message(message, '_NANI_?!'); break;
             case 'opa':         react_message(message, 'Epa, quem disse opa?'); break;
             case 'epa':         react_message(message, 'Opa, quem disse epa?'); break;
+            case 'feelsgoodman':react_emoji(message, '375482435086843904'); break;
+            case 'feelsbadman': react_emoji(message, '375482616079581194'); break;
+            case 'feelsamazingman': react_emoji(message, '375483155634847746'); break;
 
             default:
                 break;
