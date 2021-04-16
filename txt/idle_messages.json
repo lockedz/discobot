@@ -1,10 +1,13 @@
 {
-	"0" : "Provavalmente isso não funciona: intervalCheckCounter = ${intervalCheckCounter}",
-	"1" : "Propriedade 2, mas índice 1",
-	"2" : "Segue o jogo",
-	"3" : "Já no terceiro índice do array",
-	"4" : "FeelsGoodMan, 4o índice",
-	"5" : "FeelsAmazingMan, 6o índice mas 5o valor",
-	"6" : "array[6] = sou eu!",
-	"7" : "Último valor atual"
+	"0" : "Provavalmente isso não funciona: intervalCheckCounter = ${intervalCheckCounter} .",
+	"1" : "**Did you know** 11% of people are left handed.",
+	"2" : "**Did you know** unless food is mixed with saliva you can't taste it.",
+	"3" : "**Did you know** Dueling is legal is Paraguay as long as both parties are registered blood donors.",
+	"4" : "**Did you know** According to Genesis 1:20-22, the chicken came before the egg.",
+	"5" : "**Did you know** A category three hurricane releases more energy in ten minutes than all the world's nuclear weapons combined.",
+	"6" : "**Did you know** At any given time, there are 1,800 thunderstorms in progress over the earth's atmosphere.",
+	"7" : "**Did you know** A \"jiffy\" is an actual unit of time: 1/100th of a second.",
+	"8" : "**Did you know** Cho é um cagabundo sem limites. FeelsBadMan.",
+	"9" : "**Did you know** Lucas é uma vacaranha, FeelsWeirdMan.",
+	"10" : "**Did you know** Douglas não vê o sol na Irlanda há 12 milênios."
 }
