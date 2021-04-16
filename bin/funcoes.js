@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const fs =      require('fs');
 const UTIL =    require('../bin/util');
 const weather = require('weather-js');
+const fetch =   require('node-fetch');
 
 module.exports = {
     cmd_help: function(message, HELP_LISTA, TAM_PREFIX) {
@@ -31,6 +32,11 @@ module.exports = {
 		
 		return;
     },
+    cmd_howTo: function(message, args) {
+        if (args.length === 0 || args.length !== 0) { // Change when there is more howto's to add...
+            message.channel.send(`\`\`\`To use block codes on Discord, put three 'ticks' (\`) together, then the name of the language (without space) you want to highlight (or none) then the code & finally, finish with three more ticks and hit enter **after** the ticks. Done!\`\`\``);
+        }
+    },
     cmd_sleep: function(message, args, DEFAULT_TEMPO_DND, BOT, botStatus, timeoutHandler) {
         let tempoDND; // tempo em MINUTOS
     
@@ -44,9 +50,9 @@ module.exports = {
         UTIL.setStatusBOT('dnd', BOT, botStatus);
         // Depois de tempoDND minutos, retorna ao status responsivo e envia mensagem ao canal
         timeoutHandler.botHandler = setTimeout(() => {
-            UTIL.backToWork(message, 'online', 'Hell yeah! *Acordei*!', BOT, botStatus, timeoutHandler);
+            UTIL.backToWork(message, 'online', 'Hell yeah! *I am awake*!', BOT, botStatus, timeoutHandler);
         }, tempoDND);
-        message.channel.send(`Entrando no *sleep mode*. Acordando em **${UTIL.normalizeDigits((tempoDND / 60000))}**min`);
+        message.channel.send(`Entering *sleep mode*... waking up in: **${UTIL.normalizeDigits((tempoDND / 60000))}**min`);
         //console.log(BOT.user.settings.timerHandler); // FIXME: como eu faço um.. getStatus() ?
     },
     cmd_viver: function(message, args) {
@@ -142,16 +148,16 @@ module.exports = {
                 //while (mins > 60) { mins = mins % horas; console.log(`mins = ${mins}`); } // Ajustar os minutos depois de calcular as horas
                 //mins = ~~(horas / 60);
                 mins = mins % 60;
-                announceString = `Online há ${UTIL.normalizeDigits(horas)}_h_ ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
+                announceString = `Online since ${UTIL.normalizeDigits(horas)}_h_ ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
             } else {
-                announceString = `Online há ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
+                announceString = `Online since ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
             }
         } else {
-            announceString = `Online há ${UTIL.normalizeDigits(tempoTotalUptime)}_s_`;
+            announceString = `Online since ${UTIL.normalizeDigits(tempoTotalUptime)}_s_`;
         }
 
         message.channel.send(announceString).catch(erro => {
-            console.log(`Erro [${erro.stack}] no uptime`);
+            console.log(`Erro [${erro.stack}] on uptime`);
         });
         // output: console
         let timeRightNow = new Date().toLocaleTimeString();
@@ -245,9 +251,10 @@ module.exports = {
             calc = eval(args.join(' '));
         } catch(e) {
             console.log(`-- Erro no argumento de !eval: ${e}`);
-			return message.channel.send(`Erro no argumento: ${argsFormatted}`);
+			return message.channel.send(`Error in the argument list: ${argsFormatted}`);
         }
-        return message.channel.send(`${argsFormatted} = ${calc}`).catch(err => {console.error(`Erro eval: ${err}`)});
+        return;
+        //return message.channel.send(`${argsFormatted} = ${calc}`).catch(err => {console.error(`Erro eval: ${err}`)});
     },
     cmd_start: (message, args, timeoutHandler) => {
     // Fazer um "start" e um "stop" pra "!start algo" começa um timer para 'algo', mas o timer é incremental e só para com um CONST_LIMITE_TIMER ou ao mandarem o comando "!stop"
@@ -297,6 +304,7 @@ module.exports = {
         mirrorUser.name = lookForUser.user.username;
         mirrorUser.status = true;
 
+        message.channel.send(`I'll be mirroing **${mirrorUser.name}** (_${mirrorUser.style}_). To stop me from doing so, type: '!mirror -off'`);
         console.log(`-- Mirroing = ${mirrorUser.id} (${lookForUser.user.username})`);
 
         return;
@@ -304,9 +312,9 @@ module.exports = {
     cmd_memo: (message, args, MEMO) => {
         if (args.length < 1) {
             if (MEMO.content !== null) { // Se existe algum MEMO ativo
-                message.channel.send(`[MEMO] por ${MEMO.byUser} em ${MEMO.date}:\n **${MEMO.content}**`);
+                message.channel.send(`[MEMO] by ${MEMO.byUser} [${MEMO.date}]:\n **${MEMO.content}**`);
             } else {
-				message.channel.send(`_Nenhum memo foi adicionado_`);
+				message.channel.send(`_No memo at the moment..._`);
 			}
             return;
         }
@@ -319,6 +327,8 @@ module.exports = {
             message.react(id_emoji).catch(e => {console.log('Could not react! [memo delete]: '+e)});
             return;
         } else {
+            if (MEMO.content != null) return;
+            
             MEMO.byUser = message.author;
             MEMO.content = args.join(' ');
             MEMO.date = UTIL.fullDate() + ' ' + new Date().toLocaleTimeString();
@@ -339,7 +349,7 @@ module.exports = {
                     if (err) console.log(err);
 
                     if (result.length === 0) {
-                        message.channel.send('Localização inválida.')
+                        message.channel.send('Localização inválida.');
                         return;
                     }
 
@@ -483,5 +493,21 @@ module.exports = {
         adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
         message.channel.send(`${adjustedCompleteString}`);
         //console.log(adjustedCompleteString);
+    },
+    cmd_randomFact: async (message) => {
+        const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
+        console.log(`${typeof file}`);
+	    message.channel.send(`${file.text} - _source: ${file.source}_`);
     }
+    // cmd_testOne: (message, args) => { // TODO DRUNK
+    //     const VEZES = 4;
+    //     let m, timerPica;
+
+    //     m = await message.channel.send('8==D');
+
+    //     timerPica = window.setTimeout(() => (message.channel.send('8===D')), 3000);
+    //     m.edit(`${timerPica}`)
+
+    //     return;
+    // }
 };

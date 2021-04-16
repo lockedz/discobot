@@ -86,6 +86,13 @@ module.exports = {
 
         return tmpStr;
     },
+    textToHardmode: (txt) => {
+        // text to txxt
+        let tmpStr = '';
+        tmpStr = txt.replace(/[aeyiou]+/gi, 'x');
+
+        return tmpStr;
+    },
     pickRandomProperty: (obj) => { // Thanks StackOverflow
 		// IN: 	Object
 		// OUT:	ONE OF THE OBJ PROPERTIES INDEX (RANDOM)
