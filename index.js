@@ -54,7 +54,7 @@ let MEMO = {};
 * COMEÇO DO CÓDIGO *
 ********************/
 // TODO: as variáveis consideradas de "settings" devem ser escritas em um arquivo de configurações e recuperadas do mesmo em toda nova session (ex: botMandaMensagensAntiIdle, mirrorUser)
-// TODO: No comando de antiidle (cmd_antiIdle) fazer uma algoritmo pra guardar quais indices ja foram 'falados' e não repetir o mesmo random até TODOS os indices terem ido uma vez
+// TODO: No comando de antiidle (cmd_antiIdleToggle) fazer uma algoritmo pra guardar quais indices ja foram 'falados' e não repetir o mesmo random até TODOS os indices terem ido uma vez
 // TODO: onde tiver hardcoded meu nick, fazer com que seja por "roles" ?
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
 
@@ -94,8 +94,9 @@ BOT.on('ready', async () => {
 
         intervalCheckCounter++; // variável global de "controle" contando quantas vezes o interval rodou
 
-        //feelsgoodmanChannel.send(`Bip, bop: idle número ${intervalCheckCounter} em ${INTERVAL_SERVER_MESSAGES} minutos.`);
-        feelsgoodmanChannel.send(idleMessagesObject[UTIL.pickRandomProperty(idleMessagesObject)]);
+        // feelsgoodmanChannel.send(`Bip, bop: idle número ${intervalCheckCounter} em ${INTERVAL_SERVER_MESSAGES} minutos.`);
+        // feelsgoodmanChannel.send(idleMessagesObject[UTIL.pickRandomProperty(idleMessagesObject)]); // DEPRECATED: Using a GET HTTP request to get random facts now
+        FUNCOES.cmd_randomFact(feelsgoodmanChannel);
     }
     
     timeoutHandler.intervalCheck = setInterval(() => {
@@ -200,6 +201,7 @@ BOT.on('message', async (message) => {
             case 'mirror':  FUNCOES.cmd_mirror(message, args, mirrorUser); break;
             case 'memo':    FUNCOES.cmd_memo(message, args, MEMO); break;
             case 'clima':   FUNCOES.cmd_clima(message, args); break;
+            case 'fact':    FUNCOES.cmd_randomFact(message); break;
             case 'howto':   FUNCOES.cmd_howTo(message, args); break;
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
@@ -213,7 +215,7 @@ BOT.on('message', async (message) => {
             case 'pikachu': pikachu(message); break;
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
-			case 'antiidle':	FUNCOES.cmd_antiIdle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
+			case 'antiidle':	FUNCOES.cmd_antiIdleToggle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
 
             // when it's plain text with no commands fetched from "funcoes.js"
             default:
