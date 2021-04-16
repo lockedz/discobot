@@ -40,6 +40,7 @@ const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 let queue;
 let intervalCheckCounter;
 let botMandaMensagensAntiIdle = {};
+let idleTime = null;
 let allowDelete = {};
 let inutil = {};
 let eXp = {};
@@ -63,11 +64,13 @@ const init = () => {
     serverQueue = '';
     intervalCheckCounter = 0;
     botMandaMensagensAntiIdle = {flag: false};
+    intervalCheckCounter = 0;
+    idleTime = null;
     allowDelete = {flag: true};
     inutil = {handler: null, status: null};
     eXp = {up:0};
     timerGlobals = {time: 0, tempo: 0};
-    timeoutHandler = {timerHandler:null, botHandler: null, startCommand: null, intervalCheck: null};
+    timeoutHandler = {timerHandler:null, botHandler: null, startCommand: null, check: null, intervalCheck: null};
     botStatus = {status:'online'};
     mirrorUser = {id:null, status:false, style: null, name: null};
     MEMO = {byUser: null, content:null, date:null};
@@ -80,82 +83,11 @@ BOT.on('ready', async () => {
 
     const timestampInicio = new Date().toLocaleTimeString();
     console.log(`[${timestampInicio}] ${BOT.user.username} reporting for duty, bro [servers: ${BOT.guilds.size}]`);
-	
-	//console.log(JSON.stringify(BOT.guilds.get('375474831526985738'), null, 4));
-	// FIXME: Por enquanto isso será hardcoded para o server 'feelsgoodman'. No futuro, colocar o id ou nome do server a fazer isso
-	// no config
-		
-    // *****
-    // ATENÇÃO: ESSE INTERVAL VAI FICAR RODANDO **SEMPRE** COM INTERVAL_SERVER_MESSAGES MINUTOS
-    // MELHOR FORMA DE PENSAR NISSO É O BOT "CHECANDO STATUS DE QUALQUER COISA A CADA X MINUTOS" E FAZER AÇÕES (CASO NECESSÁRIO) DE ACORDO
-    // *****
-    const sendIdleMessages = (botObject, idleMessagesObject) => {
-        let feelsgoodmanChannel = botObject.guilds.get('375474831526985738').channels.get('375474831531180033');
-
-        intervalCheckCounter++; // variável global de "controle" contando quantas vezes o interval rodou
-
-        // feelsgoodmanChannel.send(`Bip, bop: idle número ${intervalCheckCounter} em ${INTERVAL_SERVER_MESSAGES} minutos.`);
-        // feelsgoodmanChannel.send(idleMessagesObject[UTIL.pickRandomProperty(idleMessagesObject)]); // DEPRECATED: Using a GET HTTP request to get random facts now
-        FUNCOES.cmd_randomFact(feelsgoodmanChannel);
-    }
-    
-    timeoutHandler.intervalCheck = setInterval(() => {
-        if (botMandaMensagensAntiIdle.flag) {
-            sendIdleMessages(BOT, IDLE_MESSAGES_OBJECT);
-        }
-    }, (INTERVAL_SERVER_MESSAGES * 60000)); // tempo ajustado para MINUTOS
-
-	//console.log(BOT.guilds.get('375474831526985738').channels.get('375474831531180033'));
 });
 
 // MUSIC AREA
 //const serverQueue = (queue === "undefined") ? "" : queue.get(message.guild.id);
 // END OF MUSIC AREA
-
-// FIXME:
-// QUAL A VANTAGEM DE TER UM CONFIG & MODULARIZAÇÃO SE, EM funcoes.js EU PRECISO IMPORTAR O util.js COM OUTRO CAMINHO "ABSOLUTO"?
-
-// ******--------*********
-//      TODO LIST:
-// ******--------*********
-// Fazer um comando "!since NICKNAME" que mostre há quanto tempo NICKNAME está online no canal
-
-// Provavelmente ajustar o config.json pra incluir "server/guild" e "channel". Por exemplo, pra ficar escutando a mudança de status/jogo de apenas um canal e não de todos que o bot encontra-se
-// talvez fazer uma 'lista' separada por, sei lá, vírgula, no proprio config pra incluir mais de um canal/guild
-
-// As constantes que utilizam "parseInt" devem lançar erros LOGO caso não consigam ser setadas; testar isso
-
-// No futuro, fazer O SISTEMA DE EXP com o package do mysql (mysql --save) e cada row (id, user, exp, level) e assim poder UPAR o camarada com um threshold
-
-// Fazer um !list <DIR> onde lista os arquivos do diretorio especificado.. talvez fazer uma lista predefinida de
-// diretórios que podem ser listados tipo '!list -a' lista varios DIRS que podem ser utilizados e 
-// '!list C:\users\artur\desktop' iria listar todos os arquivos desse diretório pra poder usar !send arquivo
-// CUIDADO, EM PASTAS COM MUITOS ARQUIVOS (TIPO DE MUSICA) VAI CAGAR PRA MANDAR AS MENSAGENS!
-
-// Fazer o bot responder ao mudar o status de JOGO falando, ao mudar o status, quanto tempo durou a jogatina no jogo X;
-
-
-// BOT.on('presenceUpdate', async (oldMember, newMember) => {
-//    // if (oldMember.presence === null || newMember.presence === null) return;
-// // FIXME:
-// /*
-// newMember as vezes volta como 'null' (quando sai de um jogo e vai pra nada)
-// como ver pra qual canal mandar a mensagem? Assumir que o bot só está em um? Mesmo assim, qual propriedade retorna um/o Channel?
-// Pelo jeito oldMember e newMember não são muito como pensei... não entendi ainda o sync/async desse evento
-// */
-// //console.log(`oldMember: ${oldMember} & newMember = ${newMember}`);
-// console.log(JSON.stringify(newMember.guild.channel, null, 4));
-// if (oldMember.presence.status === newMember.presence.status) { // se a mudança foi de JOGO e NÃO de presença
-//     if (!newMember.presence.game.equals(null)) { // foi de 'nada' pra algum jogo
-//     let aguilda = newMember;
-//         aguilda.channel.send(`${newMember} COMEÇOU a jogar ${newMember.presence.game.name}`);
-//     } else { // foi de algum jogo pra 'nada'
-//         console.log(`${newMember} PAROU de jogar ${oldMember.presence.game.name}`);
-//     }
-// } else {
-// console.log('caiu no else');}
-// });
-
 
 BOT.on('message', async (message) => {
 
@@ -215,7 +147,7 @@ BOT.on('message', async (message) => {
             case 'pikachu': pikachu(message); break;
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
-			case 'antiidle':	FUNCOES.cmd_antiIdleToggle(message, botMandaMensagensAntiIdle, INTERVAL_SERVER_MESSAGES); break;
+			case 'antiidle':FUNCOES.cmd_antiIdleToggle(message, botMandaMensagensAntiIdle, ((args[0] !== 'undefined' && !isNaN(args[0])) ? args[0] : INTERVAL_SERVER_MESSAGES), timeoutHandler); break;
 
             // when it's plain text with no commands fetched from "funcoes.js"
             default:
