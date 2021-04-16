@@ -373,7 +373,7 @@ module.exports = {
                 }
         );
     },
-	cmd_antiIdle: (message, botMandaMensagensAntiIdle, interval_server_messages) => { // FIXME: Colocar no index.js ?
+	cmd_antiIdleToggle: (message, botMandaMensagensAntiIdle, interval_server_messages) => { // FIXME: Colocar no index.js ?
 		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag; // por ser um Object, a referência é atualizada "globalmente"
 		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'PT'); // Transforma de true para 'sim' e de false para 'não'
 		
@@ -494,10 +494,10 @@ module.exports = {
         message.channel.send(`${adjustedCompleteString}`);
         //console.log(adjustedCompleteString);
     },
-    cmd_randomFact: async (message) => {
+    cmd_randomFact: async (channel) => {
         const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
-        console.log(`${typeof file}`);
-	    message.channel.send(`${file.text} - _source: ${file.source}_`);
+
+	    channel.send(`${file.text} - _source: ${file.source}_`);
     }
     // cmd_testOne: (message, args) => { // TODO DRUNK
     //     const VEZES = 4;
