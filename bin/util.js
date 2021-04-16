@@ -114,6 +114,7 @@ module.exports = {
 		switch (lang.toLowerCase()) {
 			case 'en':
 				boolStr = (bool) ? 'yes':'no';
+                break;
 			case 'pt':
 			default:
 				boolStr = (bool) ? 'sim':'não';

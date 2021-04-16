@@ -373,11 +373,26 @@ module.exports = {
                 }
         );
     },
-	cmd_antiIdleToggle: (message, botMandaMensagensAntiIdle, interval_server_messages) => { // FIXME: Colocar no index.js ?
+    cmd_randomFact: async (message) => { // Needs to be above cmd_antiIdleToggle because of the function type declartion...
+        const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
+
+	    message.channel.send(`${file.text} - _source: ${file.source}_`);
+    },
+	cmd_antiIdleToggle: (message, botMandaMensagensAntiIdle, idleTime, timeoutHandler) => { // FIXME: Colocar no index.js ?
 		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag; // por ser um Object, a referência é atualizada "globalmente"
-		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'PT'); // Transforma de true para 'sim' e de false para 'não'
+		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'en'); // Transforma de true para 'sim' e de false para 'não'
 		
-		message.channel.send(`-> Bot tem setInverval() ativado: ${boolStr}, a cada ${interval_server_messages} minutos`);
+		message.channel.send(`Bzz! Sending random facts: **${boolStr}** every **${idleTime}** minutes!`);
+
+        if (timeoutHandler.intervalCheck === null && botMandaMensagensAntiIdle.flag) {
+            timeoutHandler.intervalCheck = setInterval(() => {
+                if (botMandaMensagensAntiIdle.flag) {
+                    cmd_randomFact(message);
+                }
+            }, ((idleTime === null) ? INTERVAL_SERVER_MESSAGES : idleTime) * 60000); // tempo ajustado para MINUTOS
+        } else {
+            timeoutHandler.intervalCheck = null;
+        }
     },
     cmd_cool: (message, args) => {
         let LIMITE_MAXIMO_CARACTERES = 10;
@@ -493,11 +508,6 @@ module.exports = {
         adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
         message.channel.send(`${adjustedCompleteString}`);
         //console.log(adjustedCompleteString);
-    },
-    cmd_randomFact: async (channel) => {
-        const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
-
-	    channel.send(`${file.text} - _source: ${file.source}_`);
     }
     // cmd_testOne: (message, args) => { // TODO DRUNK
     //     const VEZES = 4;
