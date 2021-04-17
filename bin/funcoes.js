@@ -3,6 +3,7 @@
 const Discord = require('discord.js');
 const fs =      require('fs');
 const UTIL =    require('../bin/util');
+const CONFIG =  require('../config/config');
 const weather = require('weather-js');
 const fetch =   require('node-fetch');
 
@@ -374,24 +375,45 @@ module.exports = {
         );
     },
     cmd_randomFact: async function(message) { // Needs to be above cmd_antiIdleToggle because of the function type declaration...
+        
         const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
 
 	    message.channel.send(`${file.text} - _source: ${file.source}_`);
     },
-	cmd_antiIdleToggle: async function(message, botMandaMensagensAntiIdle, idleTime, timeoutHandler) { // FIXME: Colocar no index.js ?
+	cmd_antiIdleToggle: async function(message, oAntiIdle, botMandaMensagensAntiIdle, idleTime, timeoutHandler, bFirsTime) { // FIXME: Colocar no index.js ?
 		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag; // por ser um Object, a referência é atualizada "globalmente"
-		let boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'en'); // Transforma de true para 'sim' e de false para 'não'
+        if (botMandaMensagensAntiIdle.flag) {
+            oAntiIdle.count = 1;
+            oAntiIdle.channelToSend = message.channel;
+        }
 		
-		message.channel.send(`Bzz! Sending random facts: **${boolStr}!** Every **${idleTime}** minutes.`);
+		let boolStr = '?';
+		try {
+			boolStr = UTIL.boolToText(botMandaMensagensAntiIdle.flag, 'en'); // Transforma de true para 'sim' e de false para 'não'
+		} catch (e) {
+			console.log(`Error using UTIL.boolToText: ${e}`);
+		}
+		let strToSend = '';
+
+        strToSend = `Bzz! Sending random facts: **${boolStr}**!` + ((botMandaMensagensAntiIdle.flag) ? ` Every **${idleTime}** minutes.` : ``);
+		oAntiIdle.channelToSend.send(`${strToSend}`);
 
         if (timeoutHandler.intervalCheck === null && botMandaMensagensAntiIdle.flag) {
             timeoutHandler.intervalCheck = setInterval(() => {
                 if (botMandaMensagensAntiIdle.flag) {
-                   this.cmd_randomFact(message);
+                   this.cmd_randomFact(message, bFirsTime);
                 }
             }, ((idleTime === null) ? INTERVAL_SERVER_MESSAGES : idleTime) * 60000); // tempo ajustado para MINUTOS
         } else {
             timeoutHandler.intervalCheck = null;
+        }
+
+        UTIL.doLog(message, CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile);
+
+        // Adjust for the next time cmd is ran
+        if (!botMandaMensagensAntiIdle.flag) {
+            oAntiIdle.count = 0;
+            oAntiIdle.channelToSend = null;
         }
     },
     cmd_cool: (message, args) => {

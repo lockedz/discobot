@@ -16,6 +16,7 @@ module.exports = {
     },
     doLog: function(message, pathFile, moreInfo = '') { // FIXME: Existe mesmo a necessidade de incluir pathFile como argument?
 		// Escreve (ou cria, se não existir) arquivo logando o comando utilizado pelo usuário
+        // Should have a function to only log - personalizaded - to the console
         let timeNow = new Date().toLocaleTimeString();
         let fullDateAndTime = this.fullDate() + '|' + timeNow;
         let txtLog = `- (${fullDateAndTime}) [${message.author.username}@#${message.channel.name}]: ${message.content} ${moreInfo}\n`;
