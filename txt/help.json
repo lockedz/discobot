@@ -16,6 +16,7 @@
     "pikachu" : "_pikachu!_",
     "clima (String localidade)" : "_pesquisa e retorna previsão do tempo atual para (localidade). Exemplo de localidade: Recife, PE_",
     "fact" : "_faz uma GET request e retorna um fato aleatório_",
+    "antiidle [mins]" : "_o Bot fica em intervalos de [min] (ou 15mins se não houver argumento) mandando fatos aleatórios via GET requests_",
     "cool (String palavra)" : "_diz \"palavra\" de forma cool, man_",
     "tree [-mono] (String frase)" : "_formata \"frase\" como uma árvore de texto. O argumento -mono implica em monospace fonte ou não, caso não utilizado_",
     "github" : "_retorna o repositório atual_",
