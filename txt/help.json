@@ -13,7 +13,7 @@
     "memo [-del] [mensagem]" : "_deixa [mensagem] como lembrete gravado no BOT. Para ler o memo setado, usar sem argumentos. Para deletar o memo, usar -del_",
     "howlong" : "_HOW LONG CAN THIS GO ON?_",
     "howto" : "Mostrar como fazer um ```block code``` no Discord",
-    "pikachu" : "_pikachu!_",
+    "pikacho" : "_pikachu (pika...cho!)!_",
     "clima (String localidade)" : "_pesquisa e retorna previsão do tempo atual para (localidade). Exemplo de localidade: Recife, PE_",
     "fact" : "_faz uma GET request e retorna um fato aleatório_",
     "antiidle [mins]" : "_o Bot fica em intervalos de [min] (ou 15mins se não houver argumento) mandando fatos aleatórios via GET requests_",
