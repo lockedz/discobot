@@ -282,19 +282,25 @@ module.exports = {
         }
     },
     cmd_mirror: (message, args, mirrorUser) => {
-        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {}) return;
+        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {} || mirrorUser.status === false) {
+            return; // Nothing to do here, get out
+        }
 
         let iWhichArg = (args.length > 1 ? 1 : 0);
+        let defaultType = 'not_specified';
 
-        if (args[iWhichArg] === '-off') {
+        if (args[iWhichArg].toLowerCase() === '-off') {
             mirrorUser.id = null;
             mirrorUser.status = false;
             mirrorUser.style = null;
             mirrorUser.name = null;
+            //mirrorUser = {id:null, status:false, style: null, name: null}; // Why doesn't this work?
+
+            message.channel.send(`Bzz! Stopped mirroing.`);
 
             return;
         } else if (!mirrorUser.status) { // se não existir nenhum mirror ativo E tiver argumento [0] & usuario [1]
-            mirrorUser.style = (iWhichArg === 1 ? args[iWhichArg-1].substring(1, args[iWhichArg-1].length) : 'default');
+            mirrorUser.style = (iWhichArg === 1 ? args[iWhichArg-1].substring(1, args[iWhichArg-1].length) : `${defaultType}`);
         }
 
         //console.log(message.guild.member(message.mentions.users.first()).id); console.log(message.guild.members.get(args[0]));
@@ -306,7 +312,7 @@ module.exports = {
         mirrorUser.status = true;
 
         message.channel.send(`I'll be mirroing **${mirrorUser.name}** (_${mirrorUser.style}_). To stop me from doing so, type: '!mirror -off'`);
-        console.log(`-- Mirroing = ${mirrorUser.id} (${lookForUser.user.username})`);
+        console.log(`Bzz! Mirroing = ${mirrorUser.id} (${lookForUser.user.username})`);
 
         return;
     },
@@ -315,7 +321,7 @@ module.exports = {
             if (MEMO.content !== null) { // Se existe algum MEMO ativo
                 message.channel.send(`[MEMO] by ${MEMO.byUser} [${MEMO.date}]:\n **${MEMO.content}**`);
             } else {
-				message.channel.send(`_No memo at the moment..._`);
+				message.channel.send(`_No memo at the moment._`);
 			}
             return;
         }
@@ -325,7 +331,7 @@ module.exports = {
             MEMO.date = null;
 
             let id_emoji = '🆗';
-            message.react(id_emoji).catch(e => {console.log('Could not react! [memo delete]: '+e)});
+            message.react(id_emoji).catch(e => {console.log(`Could not react! [memo delete]: ${e}`)});
             return;
         } else {
             if (MEMO.content != null) return;
@@ -334,7 +340,7 @@ module.exports = {
             MEMO.content = args.join(' ');
             MEMO.date = UTIL.fullDate() + ' ' + new Date().toLocaleTimeString();
 
-            message.channel.send(`_MEMO adicionado_`);
+            message.channel.send(`_MEMO adicionado!_`);
         }
 
         return;
@@ -342,6 +348,8 @@ module.exports = {
     cmd_clima: (message, args) => {
         // Código copy-pasted (por preguiça) de https://www.youtube.com/watch?v=kQMKkg1aNaE
         // Package: weather-js
+        if (args.length === 'undefined') return false; // Check to not use .lenght on 'undefined' argument if none is passed
+
         let unidadeGraus = 'C';
         let argsAsString = args.join(' ');
 
@@ -378,9 +386,9 @@ module.exports = {
         
         const file = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(response => response.json()).catch(e => {console.log('Could not fetch randomfact: '+e)});
 
-	    message.channel.send(`${file.text} - _source: ${file.source}_`);
+	    message.channel.send(`${file.text}`); // 'source' stripped because always same source...
     },
-	cmd_antiIdleToggle: async function(message, oAntiIdle, botMandaMensagensAntiIdle, idleTime, timeoutHandler, bFirsTime) { // FIXME: Colocar no index.js ?
+	cmd_antiIdleToggle: async function(message, oAntiIdle, botMandaMensagensAntiIdle, idleTime, timeoutHandler, bFirsTime) {
 		botMandaMensagensAntiIdle.flag = !botMandaMensagensAntiIdle.flag; // por ser um Object, a referência é atualizada "globalmente"
         if (botMandaMensagensAntiIdle.flag) {
             oAntiIdle.count = 1;
@@ -395,7 +403,7 @@ module.exports = {
 		}
 		let strToSend = '';
 
-        strToSend = `Bzz! Sending random facts: **${boolStr}**!` + ((botMandaMensagensAntiIdle.flag) ? ` Every **${idleTime}** minutes.` : ``);
+        strToSend = `${CONFIG.dir.log.prefix} Sending random facts: **${boolStr}**!` + ((botMandaMensagensAntiIdle.flag) ? ` Every **${idleTime}** minutes.` : ``);
 		oAntiIdle.channelToSend.send(`${strToSend}`);
 
         if (timeoutHandler.intervalCheck === null && botMandaMensagensAntiIdle.flag) {
