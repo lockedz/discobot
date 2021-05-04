@@ -39,6 +39,7 @@ const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
 let queue;
 let intervalCheckCounter;
+let oAntiIdle = {};
 let botMandaMensagensAntiIdle = {};
 let idleTime = null;
 let allowDelete = {};
@@ -66,6 +67,7 @@ const init = () => {
     botMandaMensagensAntiIdle = {flag: false};
     intervalCheckCounter = 0;
     idleTime = null;
+    oAntiIdle = {count: 0, channelToSend: null};
     allowDelete = {flag: true};
     inutil = {handler: null, status: null};
     eXp = {up:0};
@@ -78,7 +80,6 @@ const init = () => {
 
 
 BOT.on('ready', async () => {
-
     init();
 
     const timestampInicio = new Date().toLocaleTimeString();
@@ -94,13 +95,14 @@ BOT.on('message', async (message) => {
     if (message.author.bot) return; // se msg vier de um/do BOT, sai e não faz nada
 
     // ACORDA O BOT COM !wakeup (hardcoded)
-    if (botStatus.status !== 'online' && message.content === '!wakeup' && message.author.id === '375474036022575104') {
+    if (botStatus.status !== 'online' && message.content === '!wakeup') {
         console.log('* wakeup!');
         UTIL.backToWork(message, 'online', 'Hell yeah! *Acordei*!', BOT, botStatus, timeoutHandler);
     }
 
 	// Aqui nesse IF que tudo acontece de interação com o bot
-    if (isBotAlive(inutil, botStatus)) {
+    if (!isBotAlive(inutil, botStatus)) { return false; }
+    else {
 
         const ALL_MESSAGE = message.content.split(/ +/g); // Retorna a mensagem completa, como Array
         const args = message.content.slice(TAM_PREFIX).trim().split(/ +/g); // Separa a mensagem recebida (por espaços) RETIRANDO TAM_PREFIX caracteres do início // RETIRAR O TRIM!?
@@ -144,10 +146,10 @@ BOT.on('message', async (message) => {
             // case 'skip':    MUSIC.skip(message, serverQueue); break;
             // case 'stop':    MUSIC.stop(message, serverQueue); break;
 			// Comandos que não se encaixam em nenhuma categoria
-            case 'pikachu': pikachu(message); break;
+            case 'pikacho': pikacho(message); break;
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
-			case 'antiidle':FUNCOES.cmd_antiIdleToggle(message, botMandaMensagensAntiIdle, ((args[0] !== 'undefined' && !isNaN(args[0])) ? args[0] : INTERVAL_SERVER_MESSAGES), timeoutHandler); break;
+			case 'antiidle':FUNCOES.cmd_antiIdleToggle(message, oAntiIdle, botMandaMensagensAntiIdle, ((args[0] !== 'undefined' && !isNaN(args[0])) ? args[0] : INTERVAL_SERVER_MESSAGES), timeoutHandler); break;
 
             // when it's plain text with no commands fetched from "funcoes.js"
             default:
@@ -214,7 +216,7 @@ BOT.on('message', async (message) => {
             // *********
             if (mirrorUser === 'undefined' || mirrorUser === {}) return;
             else if (mirrorUser.status === true) {
-                if (message.author.id === mirrorUser.id) {
+                if (message.author.id === !pika) {
                     let sBeforeMirror = `**${mirrorUser.name}** says: `;
                     let sMessageCntn = `_${message.content}_`;
                     switch (mirrorUser.style) {
@@ -248,9 +250,6 @@ BOT.on('message', async (message) => {
            // console.log(`BOT_REPLY_MENTION = ${BOT_REPLY_MENTION.obj2} | ${UTIL.pickRandomProperty(BOT_REPLY_MENTION)} `);
 		}
     } // end if "!inutil.status" && botStatus.status === online
-
-return;
-
 }); // end of function (bot.on.message)
 
 // *************************
@@ -287,7 +286,7 @@ function fn_allowDelete(message, allowDelete) {
 	message.channel.send(`-> Permitindo que mensagens sejam deletadas sem aviso: ${allowDeleteToString}`);
 }
 
-function pikachu(message) {
+function pikacho(message) {
     message.channel.send(`(\\\\_(\\`);
     message.channel.send(`( ^;^ )`);
     message.channel.send(`(")(")`);
