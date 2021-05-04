@@ -7,19 +7,21 @@
         "token" : "./config/token",
         "funcoes" : "./bin/funcoes",
         "util" : "./bin/util",
+        "music" : "./bin/music",
         "exp" : "./exp",
         "log": {
             "logdir"  : "./log",
-            "logfile" : "logs.log"
+            "logfile" : "logs.log",
+            "prefix:" : "Bzz! "
         }
     },
     "preference": {
         "tamanho_prefixo": "1",
         "intervalo_inativo" : "2000",
         "tempo_sleep" : "300000",
-        "tempo_interval_check" : "30"
+        "tempo_interval_check" : "15"
     },
     "about": {
-        "version" : "0.5.8a"
+        "version" : "0.8.0a"
     }
 }
