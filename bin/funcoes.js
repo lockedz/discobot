@@ -136,6 +136,7 @@ module.exports = {
     cmd_uptime: function(message) {
         let tempoTotalUptime = process.uptime(); // em segundos
         let mins, secs, horas;
+        let txtString = `Time online:`;
         let announceString = ``;
 
         tempoTotalUptime = Math.round(tempoTotalUptime);
@@ -149,12 +150,12 @@ module.exports = {
                 //while (mins > 60) { mins = mins % horas; console.log(`mins = ${mins}`); } // Ajustar os minutos depois de calcular as horas
                 //mins = ~~(horas / 60);
                 mins = mins % 60;
-                announceString = `Online since ${UTIL.normalizeDigits(horas)}_h_ ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
+                announceString = `${txtString} ${UTIL.normalizeDigits(horas)}_h_ ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
             } else {
-                announceString = `Online since ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
+                announceString = `${txtString} ${UTIL.normalizeDigits(mins)}_m_ ${UTIL.normalizeDigits(secs)}_s_`;
             }
         } else {
-            announceString = `Online since ${UTIL.normalizeDigits(tempoTotalUptime)}_s_`;
+            announceString = `${txtString} ${UTIL.normalizeDigits(tempoTotalUptime)}_s_`;
         }
 
         message.channel.send(announceString).catch(erro => {
@@ -282,7 +283,8 @@ module.exports = {
         }
     },
     cmd_mirror: (message, args, mirrorUser) => {
-        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {} || mirrorUser.status === false) {
+        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {}) {
+            message.channel.send(`- Syntax error: \'${args}\'`);
             return; // Nothing to do here, get out
         }
 
@@ -305,7 +307,10 @@ module.exports = {
 
         //console.log(message.guild.member(message.mentions.users.first()).id); console.log(message.guild.members.get(args[0]));
         let lookForUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[iWhichArg]);
-        if (!lookForUser) { return; }
+        if (!lookForUser) { 
+            message.channel.send(`- User ${lookForUser} not found`);
+            return;
+         }
         
         mirrorUser.id = lookForUser.id;
         mirrorUser.name = lookForUser.user.username;
@@ -356,6 +361,10 @@ module.exports = {
         weather.find({search: argsAsString, degreeType: unidadeGraus},
                 function(err, result) {
                     if (err) console.log(err);
+                    if (result === 'undefined') {
+                        UTIL.doLog(message, CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile);
+                        return false;
+                    }
 
                     if (result.length === 0) {
                         message.channel.send('Localização inválida.');

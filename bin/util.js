@@ -14,7 +14,7 @@ module.exports = {
 
         return day + '/' + month + '/' + year;
     },
-    doLog: function(message, pathFile, moreInfo = '') { // FIXME: Existe mesmo a necessidade de incluir pathFile como argument?
+    doLog: function(message, pathFile, moreInfo = '') { // TODO: make an error only log (error.log)
 		// Escreve (ou cria, se não existir) arquivo logando o comando utilizado pelo usuário
         // Should have a function to only log - personalizaded - to the console
         let timeNow = new Date().toLocaleTimeString();
@@ -105,7 +105,8 @@ module.exports = {
                result = prop;
         }
 
-        return result;
+        return result; // returns the index
+        //return obk[result]; // returns the value
     },
 	boolToText: (bool, lang) => {
 		// Transforma true para "sim" ou "yes" e false para "no" ou "não"
