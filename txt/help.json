@@ -9,7 +9,7 @@
     "sonho" : "_retorna algum \"sonho\" pré-definido_",
     "timer (int tempo) (String assunto) | (off) | (check)" : "_começa um timer com [tempo] segundos para (assunto) acontecer ([tempo] aceita expressões matemáticas válidas); caso já exista um timer ativo, o argumento [off] o cancela e [check] retorna o tempo restante para finalização do mesmo_",
     "eval (expressão)" : "_aplica um eval() em (expressão); (expressão) pode ser uma expressão matemática ou função javascript_",
-    "mirror [-arg] (@usuario) | mirror (off)" : "_repete todas as mensagens (que não sejam comandos) enviadas por (@usuario). Argumentos aceitos: -leet, -back & off. Se utilizado com o argumento 'off', faz o bot parar com a frescura_",
+    "mirror [-arg] (@usuario) | mirror (off)" : "_repete todas as mensagens (que não sejam comandos) enviadas por (@usuario). Argumentos aceitos: -leet, -back, -hardmode & off. Se utilizado com o argumento 'off', faz o bot parar com a frescura_",
     "memo [-del] [mensagem]" : "_deixa [mensagem] como lembrete gravado no BOT. Para ler o memo setado, usar sem argumentos. Para deletar o memo, usar -del_",
     "howlong" : "_HOW LONG CAN THIS GO ON?_",
     "howto" : "Mostrar como fazer um ```block code``` no Discord",
