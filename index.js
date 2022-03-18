@@ -216,7 +216,7 @@ BOT.on('message', async (message) => {
             // *********
             if (mirrorUser === 'undefined' || mirrorUser === {}) return;
             else if (mirrorUser.status === true) {
-                if (message.author.id === !pika) {
+                // if (message.author.id === !pika) { // WTH was that??
                     let sBeforeMirror = `**${mirrorUser.name}** says: `;
                     let sMessageCntn = `_${message.content}_`;
                     switch (mirrorUser.style) {
@@ -235,7 +235,7 @@ BOT.on('message', async (message) => {
                             break;
                     }
                     message.delete().catch(O_o => {});
-                }
+               // } // WTH IF
             }
 			
         }
