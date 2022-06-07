@@ -76,22 +76,24 @@ module.exports = {
 		return;
     },
     cmd_say: function(message, args) {
+        if (args === undefined || args === null || args === '') { return false; }
+
         const sayMessage = args.join(' ');
         message.delete().catch(O_o => {}); // Se não puder deletar a mensagem, não faz nada com o erro e continua
         message.channel.send(sayMessage);
 		
-		return;
+		return true;
     },
     cmd_8ball: function(message, args, EIGHTBALL) {
         if (args.length === 0) return;
         else message.reply(EIGHTBALL[Math.floor(Math.random() * EIGHTBALL.length)]);
 		
-		return;
+		return true;
     },
     cmd_sonho: function(message, SONHOS) {
         message.channel.send(SONHOS[Math.floor(Math.random() * SONHOS.length)]);
 		
-		return;
+		return true;
     },
     cmd_timer: function(message, args, timeoutHandler, timerGlobals) {
         let tempoDecorrido, tempoRestante;
@@ -132,6 +134,8 @@ module.exports = {
                 message.channel.send('Tempo decorrido no timer: **' + UTIL.normalizeDigits(tempoDecorrido) + '**sec. Restam: **' + UTIL.normalizeDigits(tempoRestante) + '**sec');
             }
         }
+
+        return true;
     },
     cmd_uptime: function(message) {
         let tempoTotalUptime = process.uptime(); // em segundos
@@ -283,7 +287,7 @@ module.exports = {
         }
     },
     cmd_mirror: (message, args, mirrorUser) => {
-        if (args.length < 1 || args.length > 2 || typeof mirrorUser === 'undefined' || mirrorUser === {}) {
+        if (args.length < 1 || args.length > 2 || typeof mirrorUser === undefined || mirrorUser === {}) {
             message.channel.send(`- Syntax error: \'${args}\'`);
             return; // Nothing to do here, get out
         }
@@ -328,7 +332,7 @@ module.exports = {
             } else {
 				message.channel.send(`_No memo at the moment._`);
 			}
-            return;
+            return true;
         }
 
         if (args[0] === '-del') {
@@ -337,7 +341,7 @@ module.exports = {
 
             let id_emoji = '🆗';
             message.react(id_emoji).catch(e => {console.log(`Could not react! [memo delete]: ${e}`)});
-            return;
+            return true;
         } else {
             if (MEMO.content != null) return;
             
@@ -348,12 +352,12 @@ module.exports = {
             message.channel.send(`_MEMO adicionado!_`);
         }
 
-        return;
+        return true;
     },
     cmd_clima: (message, args) => {
         // Código copy-pasted (por preguiça) de https://www.youtube.com/watch?v=kQMKkg1aNaE
         // Package: weather-js
-        if (args.length === 'undefined') return false; // Check to not use .lenght on 'undefined' argument if none is passed
+        if (args === undefined) return false; // Check to not use .lenght on 'undefined' argument if none is passed
 
         let unidadeGraus = 'C';
         let argsAsString = args.join(' ');
@@ -361,14 +365,14 @@ module.exports = {
         weather.find({search: argsAsString, degreeType: unidadeGraus},
                 function(err, result) {
                     if (err) console.log(err);
-                    if (result === 'undefined') {
+                    if (result === undefined) {
                         UTIL.doLog(message, CONFIG.dir.log.logdir+'/'+CONFIG.dir.log.logfile);
                         return false;
                     }
 
                     if (result.length === 0) {
                         message.channel.send('Localização inválida.');
-                        return;
+                        return false;
                     }
 
                     // Variables
@@ -546,7 +550,23 @@ module.exports = {
 
         adjustedCompleteString = '\`\`\`' + completeString + '\`\`\`';
         message.channel.send(`${adjustedCompleteString}`);
-        //console.log(adjustedCompleteString);
+    },
+    cmd_irony: (message, args) => {
+        let sTxt = args.join(' ').toUpperCase();
+
+        if (sTxt === undefined || sTxt === null) { return false; }
+        else {
+            if (sTxt.length === 0) { return false; }
+
+            let stmp_Txt = sTxt.charAt(0).toLowerCase();
+            for (let i = 0; i < sTxt.length; i++) {
+                stmp_Txt += ((i % 2) ? sTxt.charAt(i+1).toLowerCase() : sTxt.charAt(i+1));
+            }
+
+            message.channel.send(`${stmp_Txt}`);
+
+            return true;
+        }
     }
     // cmd_testOne: (message, args) => { // TODO DRUNK
     //     const VEZES = 4;

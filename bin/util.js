@@ -1,3 +1,4 @@
+const { exec } = require('child_process');
 const fs = require('fs');
 
 module.exports = {
@@ -106,7 +107,7 @@ module.exports = {
         }
 
         return result; // returns the index
-        //return obk[result]; // returns the value
+        //return obj[result]; // returns the value
     },
 	boolToText: (bool, lang) => {
 		// Transforma true para "sim" ou "yes" e false para "no" ou "não"
@@ -124,5 +125,20 @@ module.exports = {
 		}
 				
 		return boolStr;
-	}
-}
+	},
+    doActionIfThreshold: (threshold = 0.5) => { // Calls another function / action if a threshold requirement is met
+        // in:  float [0,1[ threshold
+        // out: true to execute or false to not execute
+        if (threshold === undefined || threshold === null || typeof threshold !== "number") { return; }
+        let fRandomNumZeroToOne = Math.random();
+        let execute = false;
+
+        execute = (threshold <= fRandomNumZeroToOne) ? true : false;
+
+        if (!execute) {
+            console.log(`-> Did not execute! Threshold = ${threshold} > ${fRandomNumZeroToOne}!`);
+        }
+        
+        return execute;
+    }
+};
