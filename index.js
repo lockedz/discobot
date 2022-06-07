@@ -7,12 +7,12 @@ const HELP_LISTA =      require(CONFIG.dir.help);
 const RESPONSE_OBJECT = require(CONFIG.dir.respostas); // Deixar todo elemento[0] da tupla em lowercase e sem espaços
 const BOT_REPLY_MENTION = require(CONFIG.dir.replies);
 const UTIL =            require(CONFIG.dir.util);
+const CALENDAR =        require(CONFIG.dir.calendar);
 const FUNCOES =         require(CONFIG.dir.funcoes);
-const MUSIC =           require(CONFIG.dir.music);
+
 
 const BOT =             new Discord.Client();
 // TOOD: FAZER UM "MELHOR DE TRÊS" COM O !COINFLIP
-
 
     
 const BOT_VERSION =     CONFIG.about.version; // atualizado 10/09/2018
@@ -51,7 +51,6 @@ let botStatus = {}; // obj (passa-se por referência)
 let mirrorUser = {}; // id do usuário na guild | status se está on [o mirror] (true) ou não (false) | style qual estilo (função) pro texto
 let MEMO = {};
 
-
 /* *****************
 * COMEÇO DO CÓDIGO *
 ********************/
@@ -59,7 +58,6 @@ let MEMO = {};
 // TODO: No comando de antiidle (cmd_antiIdleToggle) fazer uma algoritmo pra guardar quais indices ja foram 'falados' e não repetir o mesmo random até TODOS os indices terem ido uma vez
 // TODO: onde tiver hardcoded meu nick, fazer com que seja por "roles" ?
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
-
 const init = () => {
     queue = new Map();
     serverQueue = '';
@@ -86,9 +84,6 @@ BOT.on('ready', async () => {
     console.log(`[${timestampInicio}] ${BOT.user.username} reporting for duty, bro [servers: ${BOT.guilds.size}]`);
 });
 
-// MUSIC AREA
-//const serverQueue = (queue === "undefined") ? "" : queue.get(message.guild.id);
-// END OF MUSIC AREA
 
 BOT.on('message', async (message) => {
 
@@ -140,16 +135,15 @@ BOT.on('message', async (message) => {
             case 'cool':    FUNCOES.cmd_cool(message, args); break; // 14/02/2019
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
+            case 'duh':     FUNCOES.cmd_irony(message, args); break; // 21/03/2022
+            case 'calendar':CALENDAR.plotCalendar(message); break;
             //case 'testOne': FUNCOES.cmd_testOne(message,args); break; // TODO
-            // YOUTUBE SONGS FUNCTIONS // FIXME TODO
-            // case 'playtubao': MUSIC.execute(message, args, serverQueue); break;
-            // case 'skip':    MUSIC.skip(message, serverQueue); break;
-            // case 'stop':    MUSIC.stop(message, serverQueue); break;
+
 			// Comandos que não se encaixam em nenhuma categoria
             case 'pikacho': pikacho(message); break;
 			// Comandos utilitários
             case 'allowdelete': fn_allowDelete(message, allowDelete); break;    
-			case 'antiidle':FUNCOES.cmd_antiIdleToggle(message, oAntiIdle, botMandaMensagensAntiIdle, ((args[0] !== 'undefined' && !isNaN(args[0])) ? args[0] : INTERVAL_SERVER_MESSAGES), timeoutHandler); break;
+			case 'antiidle':FUNCOES.cmd_antiIdleToggle(message, oAntiIdle, botMandaMensagensAntiIdle, ((args[0] !== undefined && !isNaN(args[0])) ? args[0] : INTERVAL_SERVER_MESSAGES), timeoutHandler); break;
 
             // when it's plain text with no commands fetched from "funcoes.js"
             default:
@@ -161,22 +155,23 @@ BOT.on('message', async (message) => {
         // REAGE A STRINGS "STANDALONE", NÃO COMANDOS (apesar de, em teoria, poder ser tratado como um comando)
         // TEXTOS "STANDALONE" PARA REAÇÕES (diferem do RESPONSE_OBJECT porque deve ser APENAS e EXATAMENTE esse texto na linha)
         // QUALQUER CASE (os 'case' devem ser LOWERCASE aqui, mas o BOT vai analisar qualquer case no Discord)
+        let wasThereBotReply = true;
+        // 03.04.2022:  Added a statistic function to only answer x% amount of the times (refer to UTIL.js => doActionIfThreshold)
         switch (lowerCaseContent) {
-            case 'good bot':    react_emoji(message, '375482435086843904'); break; // Coloca um Reaction ao ver a standalone-message: 'good bot'
-			case 'bad bot':     react_emoji(message, '375482616079581194'); break;
-            case 'joa':         react_message(message, 'Kin <:bunitaum:375662423065231371>'); break; // Manda ao canal um "Kin [emoji]" ao ler "JOA"
-            case 'xd':          react_message(message, 'xisdê xD'); break;
-            case 'ez':			react_message(message, '<:ez:383053763776217098> Clap'); break;
-            case 'cho safado':  react_message(message, 'Essa fada!'); break;
-            case 'omae wa mou shindeiru': react_message(message, '_NANI_?!'); break;
-            case 'opa':         react_message(message, 'Epa, quem disse opa?'); break;
-            case 'epa':         react_message(message, 'Opa, quem disse epa?'); break;
-            case 'feelsgoodman':react_emoji(message, '375482435086843904'); break;
-            case 'feelsbadman': react_emoji(message, '375482616079581194'); break;
-            case 'feelsamazingman': react_emoji(message, '375483155634847746'); break;
+            case 'good bot':    doReact(message, '375482435086843904', 2); break; // Coloca um Reaction ao ver a standalone-message: 'good bot'
+            case 'bad bot':     doReact(message, '375482616079581194', 2); break;
+            case 'joa':         doReact(message, 'Kin <:bunitaum:375662423065231371>', 1); break; // Manda ao canal um "Kin [emoji]" ao ler "JOA"
+            case 'xd':          doReact(message, 'xisdê xD', 1); break;
+            case 'ez':			doReact(message, '<:ez:383053763776217098> Clap', 1); break;
+            case 'cho safado':  doReact(message, 'Essa fada!', 1); break;
+            case 'omae wa mou shindeiru': doReact(message, '_NANI_?!', 1); break;
+            case 'opa':         doReact(message, 'Epa, quem disse opa?', 1); break;
+            case 'epa':         doReact(message, 'Opa, quem disse epa?', 1); break;
+            case 'feelsgoodman':doReact(message, '375482435086843904', 2); break;
+            case 'feelsbadman': doReact(message, '375482616079581194', 2); break;
+            case 'feelsamazingman': doReact(message, '375483155634847746', 2); break;
 
-            default:
-                break;
+            default:    wasThereBotReply = false; break;
         }
 		
 		let fatorExp = undefined;
@@ -214,9 +209,8 @@ BOT.on('message', async (message) => {
 			// *********
 			// MIRROING *
             // *********
-            if (mirrorUser === 'undefined' || mirrorUser === {}) return;
+            if (mirrorUser === undefined || mirrorUser === {}) { return false; }
             else if (mirrorUser.status === true) {
-                // if (message.author.id === !pika) { // WTH was that??
                     let sBeforeMirror = `**${mirrorUser.name}** says: `;
                     let sMessageCntn = `_${message.content}_`;
                     switch (mirrorUser.style) {
@@ -235,7 +229,6 @@ BOT.on('message', async (message) => {
                             break;
                     }
                     message.delete().catch(O_o => {});
-               // } // WTH IF
             }
 			
         }
@@ -256,6 +249,7 @@ BOT.on('message', async (message) => {
 // **** FUNÇÕES DE REACT: > START ****
 // *************************
 
+// Deprecated functions due to "doReact()"
 function myReact(mycallback, str) {	// FIXME! Unhandled promise rejection (rejection id: 1): TypeError: Cannot read property 'client' of undefined
     // myReact(message.channel.send, 'cagabundo');
 	mycallback(str).catch(e => {console.log('could not react: '+e)});
@@ -263,16 +257,36 @@ function myReact(mycallback, str) {	// FIXME! Unhandled promise rejection (rejec
 
 // message: obj message do discord.js | emoji: string do emoji personalizado
 function react_emoji(message, emoji) {
+    if (!UTIL.doActionIfThreshold(0.5)) { return false; }; // Did not execute reply because of threshold
+
     message.react(emoji).catch(e => {console.log('could not react with emoji: '+e)});
 	
-	return;
+	return true;
 }
 
 // message: obj message do discord.js | _txt: string a ser dita no canal
 function react_message(message, _txt) {
+    if (!UTIL.doActionIfThreshold(0.5)) { return false; }; // Did not execute reply because of threshold
+
 	message.channel.send(_txt).catch(e => {console.log('could not react with message: '+e)});
 	
-	return;
+	return true;
+}
+// end of deprecated functions due to "doReact()"
+
+// 06.04.2022
+let fReactionThreshold = 0.7; // 70% of time will reply
+function doReact(message, sArg, iType) { // iType = 1 for text | 2 for emoji; sArg = String of text or Emoji
+    if (message === undefined || sArg === '' || iType === '') { return false; }
+    if (!UTIL.doActionIfThreshold(fReactionThreshold)) { return false; }; // Did not execute action because of threshold
+
+    if (iType === 1) {
+        message.channel.send(sArg).catch(e => {console.log('could not react with message: '+e)});
+    } else if (iType === 2) {
+        message.react(sArg).catch(e => {console.log('could not react with emoji: '+e)});
+    }
+
+    return true;
 }
 
 // *********************************

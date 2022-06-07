@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "rockon": "node ./index.js"
+    "rockon": "node .\/index.js"
   },
   "author": "Artur Müller",
   "license": "ISC",
