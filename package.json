@@ -10,7 +10,7 @@
   "author": "Artur Müller",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.5.0",
+    "@discordjs/opus": "^0.8.0",
     "bufferutil": "^4.0.1",
     "discord.js": "^11.6.4",
     "ffmpeg": "0.0.4",
