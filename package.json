@@ -1,16 +1,15 @@
 {
   "name": "discobot",
-  "version": "1.0.0",
-  "description": "Hell Yeah, dude",
+  "version": "2.0.0",
+  "description": "Discord Bot - For Funsies with Javascript",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "rockon": "node .\/index.js"
+    "rockon": "node ./index.js"
   },
   "author": "Artur Müller",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.5.0",
     "bufferutil": "^4.0.1",
     "discord.js": "^11.6.4",
     "ffmpeg": "0.0.4",
