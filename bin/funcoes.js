@@ -35,7 +35,7 @@ module.exports = {
     },
     cmd_howTo: function(message, args) {
         if (args.length === 0 || args.length !== 0) { // Change when there is more howto's to add...
-            message.channel.send(`\`\`\`To use block codes on Discord, put three 'ticks' (\`) together, then the name of the language (without space) you want to highlight (or none) then the code & finally, finish with three more ticks and hit enter **after** the ticks. Done!\`\`\``);
+            message.channel.send(`\`\`\`To use block codes on Discord, put three 'ticks' (\`) together, then the name of the language (without space) you want to highlight (or none) then the code & finally, finish with three more ticks and hit enter **after** the ticks. Done!\`\`\``); // ` otherwise Notepad++ will syntax highlight erroneous...
         }
     },
     cmd_sleep: function(message, args, DEFAULT_TEMPO_DND, BOT, botStatus, timeoutHandler) {
@@ -287,7 +287,7 @@ module.exports = {
         }
     },
     cmd_mirror: (message, args, mirrorUser) => {
-        if (args.length < 1 || args.length > 2 || typeof mirrorUser === undefined || mirrorUser === {}) {
+        if (args.length < 1 || args.length > 2 || typeof mirrorUser === undefined || mirrorUser == {}) {
             message.channel.send(`- Syntax error: \'${args}\'`);
             return; // Nothing to do here, get out
         }
@@ -379,19 +379,21 @@ module.exports = {
                     let current = result[0].current;
                     let location = result[0].location;
 
-                    const embed = new Discord.RichEmbed()
-                        .setDescription(`**${current.skytext}**`)
-                        .setAuthor(`Weather for ${current.observationpoint}`)
-                        .setThumbnail(current.imageUrl)
-                        .setColor(0x00AE86)
-                        .addField('Timezone',`UTC ${location.timezone}`, true)
-                        .addField('Observation time', `${current.observationtime}`, true)
-                        .addField('Temperature',`${current.temperature} ${unidadeGraus}`, true)
-                        .addField('Feels like', `${current.feelslike} ${unidadeGraus}`, true)
-                        .addField('Winds', `${current.winddisplay}`, true)
-                        .addField('Humidity', `${current.humidity}%`, true)
+                    message.channel.send(`${current.temperature} ${unidadeGraus} in ${current.observationpoint} @ ${current.observationtime}/${location.timezone}`);
 
-                        message.channel.send({embed});
+                    // const embed = new Discord.RichEmbed()
+                    //     .setDescription(`**${current.skytext}**`)
+                    //     .setAuthor(`Weather for ${current.observationpoint}`)
+                    //     .setThumbnail(current.imageUrl)
+                    //     .setColor(0x00AE86)
+                    //     .addField('Timezone',`UTC ${location.timezone}`, true)
+                    //     .addField('Observation time', `${current.observationtime}`, true)
+                    //     .addField('Temperature',`${current.temperature} ${unidadeGraus}`, true)
+                    //     .addField('Feels like', `${current.feelslike} ${unidadeGraus}`, true)
+                    //     .addField('Winds', `${current.winddisplay}`, true)
+                    //     .addField('Humidity', `${current.humidity}%`, true)
+
+                        //message.channel.send({embed});
                 }
         );
     },
@@ -457,7 +459,7 @@ module.exports = {
 
         for (let i = 0; i < tam_total_mensagem; i++) {
             str_acumulador += str_args.charAt(i);
-            str_completa += str_acumulador + '\n';
+            str_completa += str_acumulador + '\n'; // Object.reduce() ? FIXME
         }
 
         message.channel.send('\u200B\n' + str_completa);
