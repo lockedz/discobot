@@ -379,19 +379,21 @@ module.exports = {
                     let current = result[0].current;
                     let location = result[0].location;
 
-                    const embed = new Discord.RichEmbed()
-                        .setDescription(`**${current.skytext}**`)
-                        .setAuthor(`Weather for ${current.observationpoint}`)
-                        .setThumbnail(current.imageUrl)
-                        .setColor(0x00AE86)
-                        .addField('Timezone',`UTC ${location.timezone}`, true)
-                        .addField('Observation time', `${current.observationtime}`, true)
-                        .addField('Temperature',`${current.temperature} ${unidadeGraus}`, true)
-                        .addField('Feels like', `${current.feelslike} ${unidadeGraus}`, true)
-                        .addField('Winds', `${current.winddisplay}`, true)
-                        .addField('Humidity', `${current.humidity}%`, true)
+                    message.channel.send(`${current.temperature} ${unidadeGraus} in ${current.observationpoint} @ ${current.observationtime}/${location.timezone}`);
 
-                        message.channel.send({embed});
+                    // const embed = new Discord.RichEmbed()
+                    //     .setDescription(`**${current.skytext}**`)
+                    //     .setAuthor(`Weather for ${current.observationpoint}`)
+                    //     .setThumbnail(current.imageUrl)
+                    //     .setColor(0x00AE86)
+                    //     .addField('Timezone',`UTC ${location.timezone}`, true)
+                    //     .addField('Observation time', `${current.observationtime}`, true)
+                    //     .addField('Temperature',`${current.temperature} ${unidadeGraus}`, true)
+                    //     .addField('Feels like', `${current.feelslike} ${unidadeGraus}`, true)
+                    //     .addField('Winds', `${current.winddisplay}`, true)
+                    //     .addField('Humidity', `${current.humidity}%`, true)
+
+                        //message.channel.send({embed});
                 }
         );
     },

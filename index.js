@@ -1,5 +1,11 @@
-const { throws } = require('assert');
-const Discord =         require('discord.js');
+//const { Client, EmbedBuider, PermissionsBitField, Permissions, ClientPresence, GatewayIntentBits, SlashCommandBuilder } = require('discord.js');
+const { Client, EmbedBuider, GatewayIntentBits } = require('discord.js');
+const BOT = new Client({
+	intents: [
+	GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent
+	]
+});
+
 const fs =              require('fs');
 const CONFIG =          require('./config/config');
 const TOKEN =           require(CONFIG.dir.token);
@@ -9,11 +15,6 @@ const BOT_REPLY_MENTION = require(CONFIG.dir.replies);
 const UTIL =            require(CONFIG.dir.util);
 const CALENDAR =        require(CONFIG.dir.calendar);
 const FUNCOES =         require(CONFIG.dir.funcoes);
-
-
-const BOT =             new Discord.Client();
-// TOOD: FAZER UM "MELHOR DE TRÊS" COM O !COINFLIP
-
     
 const BOT_VERSION =     CONFIG.about.version; // atualizado 10/09/2018
 const TAM_PREFIX =      parseInt(CONFIG.preference.tamanho_prefixo); // TAMANHO DO 'CHAR' DE PREFIXO PARA COMANDOS (1: '!' OU '+')
@@ -34,10 +35,10 @@ const SONHOS = [
     'Essa noite eu... não tive um sonho!'
 ];
 const INTERVAL_SERVER_MESSAGES = parseInt(CONFIG.preference.tempo_interval_check) || 60; // Tempo em minutos para ficar mandando mensagem para um canal em especifico, evitando canal idle
-
 const IDLE_MESSAGES_OBJECT = require(CONFIG.dir.idle_messages);
 
-let queue;
+/* =================== END OF CONSTS =================== */
+
 let intervalCheckCounter;
 let oAntiIdle = {};
 let botMandaMensagensAntiIdle = {};
@@ -59,8 +60,6 @@ let MEMO = {};
 // TODO: onde tiver hardcoded meu nick, fazer com que seja por "roles" ?
 // Fazer com que o !antiidle aceite um parâmetro que seja o canal a mandar as mensagens
 const init = () => {
-    queue = new Map();
-    serverQueue = '';
     intervalCheckCounter = 0;
     botMandaMensagensAntiIdle = {flag: false};
     intervalCheckCounter = 0;
@@ -85,7 +84,9 @@ BOT.on('ready', async () => {
 });
 
 
-BOT.on('message', async (message) => {
+BOT.on('messageCreate', async (message) => { // was "message"
+
+    //console.log(`WOrking with... ${message}`);
 
     if (message.author.bot) return; // se msg vier de um/do BOT, sai e não faz nada
 
@@ -95,9 +96,11 @@ BOT.on('message', async (message) => {
         UTIL.backToWork(message, 'online', 'Hell yeah! *Acordei*!', BOT, botStatus, timeoutHandler);
     }
 
-	// Aqui nesse IF que tudo acontece de interação com o bot
-    if (!isBotAlive(inutil, botStatus)) { return false; }
-    else {
+	
+    if (!isBotAlive(inutil, botStatus)) {
+        return false;
+    }
+    else { // Here it begins: all the bot interactions (given that it is not 'inactive/sleeping')
 
         const ALL_MESSAGE = message.content.split(/ +/g); // Retorna a mensagem completa, como Array
         const args = message.content.slice(TAM_PREFIX).trim().split(/ +/g); // Separa a mensagem recebida (por espaços) RETIRANDO TAM_PREFIX caracteres do início // RETIRAR O TRIM!?
@@ -136,7 +139,7 @@ BOT.on('message', async (message) => {
             case 'tree':    FUNCOES.cmd_tree(message, args); break; // 15/02/2019
             case 'mktree':  FUNCOES.cmd_mktree(message, args); break; // 19/02/2019
             case 'duh':     FUNCOES.cmd_irony(message, args); break; // 21/03/2022
-            case 'calendar':CALENDAR.plotCalendar(message); break;
+            case 'calendar':CALENDAR.plotCalendar(message); break; // Adjusted: 06.08.2022
             //case 'testOne': FUNCOES.cmd_testOne(message,args); break; // TODO
 
 			// Comandos que não se encaixam em nenhuma categoria
@@ -177,7 +180,7 @@ BOT.on('message', async (message) => {
 		let fatorExp = undefined;
         if (isCommandUtilized) { // IF COMMAND WAS USED
             // EXP (MAIOR AQUI, PQ É COM COMANDO)
-			fatorExp = 1.5; // 50% mais exp por ter utilizado um comando
+			//fatorExp = 1.5; // 50% mais exp por ter utilizado um comando
 			
 			// ANTI SPAM
             UTIL.ficarInutil(inutil, DESCANSO);
@@ -189,6 +192,7 @@ BOT.on('message', async (message) => {
             // ** CASE InSeNsItIvE **
             let tmpTxt, tmp;
             let allMsgLen = ALL_MESSAGE.length;
+
             for (let x = 0; x < allMsgLen; x++) {
                 tmpTxt = ALL_MESSAGE[x].toString().toLowerCase();
                 if (x === allMsgLen-1) { // Caso seja a última palavra, permitir que ela venha seguida de ponto gráfico ("?", ".", etc)
@@ -209,7 +213,9 @@ BOT.on('message', async (message) => {
 			// *********
 			// MIRROING *
             // *********
-            if (mirrorUser === undefined || mirrorUser === {}) { return false; }
+            if (mirrorUser === undefined || mirrorUser == {}) {
+                return false;
+            }
             else if (mirrorUser.status === true) {
                     let sBeforeMirror = `**${mirrorUser.name}** says: `;
                     let sMessageCntn = `_${message.content}_`;
@@ -236,7 +242,7 @@ BOT.on('message', async (message) => {
 		// addExp(message, CONFIG.dir.exp, fatorExp, eXp); 
 		
 		// ÁREA PARA QUANDO MENCIONAREM O NICK DO BOT
-        if (message.isMentioned(BOT.user)) {
+        if (message.mentions.has(BOT.user.id)) {
             let myReply = BOT_REPLY_MENTION[UTIL.pickRandomProperty(BOT_REPLY_MENTION)];
             
             message.reply(myReply);
@@ -248,47 +254,22 @@ BOT.on('message', async (message) => {
 // *************************
 // **** FUNÇÕES DE REACT: > START ****
 // *************************
-
-// Deprecated functions due to "doReact()"
-function myReact(mycallback, str) {	// FIXME! Unhandled promise rejection (rejection id: 1): TypeError: Cannot read property 'client' of undefined
-    // myReact(message.channel.send, 'cagabundo');
-	mycallback(str).catch(e => {console.log('could not react: '+e)});
-}
-
-// message: obj message do discord.js | emoji: string do emoji personalizado
-function react_emoji(message, emoji) {
-    if (!UTIL.doActionIfThreshold(0.5)) { return false; }; // Did not execute reply because of threshold
-
-    message.react(emoji).catch(e => {console.log('could not react with emoji: '+e)});
-	
-	return true;
-}
-
-// message: obj message do discord.js | _txt: string a ser dita no canal
-function react_message(message, _txt) {
-    if (!UTIL.doActionIfThreshold(0.5)) { return false; }; // Did not execute reply because of threshold
-
-	message.channel.send(_txt).catch(e => {console.log('could not react with message: '+e)});
-	
-	return true;
-}
-// end of deprecated functions due to "doReact()"
-
 // 06.04.2022
-let fReactionThreshold = 0.7; // 70% of time will reply
+// Update:  08.06.2022
+let fReactionThreshold = 0.3; // 70% of time will reply
+
 function doReact(message, sArg, iType) { // iType = 1 for text | 2 for emoji; sArg = String of text or Emoji
     if (message === undefined || sArg === '' || iType === '') { return false; }
     if (!UTIL.doActionIfThreshold(fReactionThreshold)) { return false; }; // Did not execute action because of threshold
 
-    if (iType === 1) {
-        message.channel.send(sArg).catch(e => {console.log('could not react with message: '+e)});
-    } else if (iType === 2) {
-        message.react(sArg).catch(e => {console.log('could not react with emoji: '+e)});
+    if (iType === 1) { // 1 = Message
+        message.channel.send(sArg).catch(e => {console.log(`could not react with message: ${e}`)});
+    } else if (iType === 2) { // 2 = Emoji
+        message.react(sArg).catch(e => {console.log(`could not react with emoji: ${e}`)});
     }
 
     return true;
 }
-
 // *********************************
 // **** FUNÇÕES DE REACT: > END *****
 // *********************************
@@ -377,10 +358,20 @@ BOT.on('messageDelete', (message) => {
 // Not tested yet: when does this happen?
 BOT.on('disconnect', (err, code) => {
 	console.log(`-- Disconnected! [${err}:${code}] Trying reconnect...`);
+
 	try {
 		BOT.connect(); // ou seria (caso o evento realmente funcione) BOT.login(TOKEN.token); ?
 	} catch(e) {
 		console.log(`Erro no BOT.connect: ${e}`);
 	}
-	console.log(`-- Reconnected?`);
+    finally {
+	    console.log(`-- Reconnected?`);
+        
+        process.exit(1);
+    }
+
+});
+
+process.on('unhandledRejection', error => {
+	console.log('Unhandled promise rejection:', error);
 });
