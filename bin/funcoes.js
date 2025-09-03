@@ -9,10 +9,11 @@ const fetch =   require('node-fetch');
 
 module.exports = {
     cmd_help: function(message, HELP_LISTA, TAM_PREFIX) {
+        let strDeComandos = ``;
         let isTooBig = false;
 		let totalCommands = Object.keys(HELP_LISTA).length;
-        const embedHelp = new Discord.RichEmbed()
-			.setColor('#bb30db')
+        const embedHelp = new Discord.EmbedBuilder()
+			.setColor(0xbb30db)
 			.setTitle('Lista de comandos\n\n')
 			.setDescription('Todos os comandos devem ser utilizados com um prefixo de tamanho '+UTIL.normalizeDigits(TAM_PREFIX));
         Object.keys(HELP_LISTA).forEach((key, idx) => {
@@ -21,15 +22,19 @@ module.exports = {
             // console.log(`vejamos key = ${key} e indice = ${idx} e conteudo = ${HELP_LISTA[key]}`);
             if (!isTooBig) {
                 embedHelp
-                    .addField(`${key}`, `${HELP_LISTA[key]}`);
+                    //.addFields({ name: `${key}`, value: `${HELP_LISTA[key]}`, inline: true })
+                    // message.channel.send(`${key} ${HELP_LISTA[key]}`);
+                    strDeComandos += `${key} ${HELP_LISTA[key]}\n`
                 if (idx === 24) { // 24, aparentemente, é o máximo de campos embed que podemos ter
                     isTooBig = true;
-                    embedHelp.setFooter(`\n*... ainda existem mais ${UTIL.normalizeDigits(totalCommands-24)} comandos`);
+                    embedHelp.setFooter({ text: `\n*... ainda existem mais ${UTIL.normalizeDigits(totalCommands-24)} comandos` });
                 }
             }
         });
-        if (!isTooBig)	embedHelp.setFooter(`\n${UTIL.normalizeDigits(totalCommands)} comandos listados`);
-        message.channel.send(embedHelp);
+        message.channel.send(`${strDeComandos}`);
+        
+        if (!isTooBig)	embedHelp.setFooter({ text: `\n${UTIL.normalizeDigits(totalCommands)} comandos listados` }); //embedHelp.setFooter(`\n${UTIL.normalizeDigits(totalCommands)} comandos listados`);
+        message.channel.send(`\n${UTIL.normalizeDigits(totalCommands)} comandos listados`);
 		
 		return;
     },
@@ -69,8 +74,9 @@ module.exports = {
 		return;
     },
     cmd_ping: async function(message, BOT) {
-        const m = await message.channel.send('Ping?');
-        m.edit(`**Pong**! *${Math.round(BOT.ping)}*ms`)
+        message.channel.send('Pinging...').then(m => {
+            m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms`);
+        })
         .catch(e => {console.log(e.stack)});
 		
 		return;
@@ -293,7 +299,7 @@ module.exports = {
         }
 
         let iWhichArg = (args.length > 1 ? 1 : 0);
-        let defaultType = 'not_specified';
+        let defaultType = 'not-specified';
 
         if (args[iWhichArg].toLowerCase() === '-off') {
             mirrorUser.id = null;
@@ -309,15 +315,15 @@ module.exports = {
             mirrorUser.style = (iWhichArg === 1 ? args[iWhichArg-1].substring(1, args[iWhichArg-1].length) : `${defaultType}`);
         }
 
-        //console.log(message.guild.member(message.mentions.users.first()).id); console.log(message.guild.members.get(args[0]));
-        let lookForUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[iWhichArg]);
+        // console.log(message.guild.members.cache.get(message.mentions.users.first()).id); console.log(message.guild.members.get(args[0]));
+        let lookForUser = message.mentions.users.first() || message.guild.members.get(args[iWhichArg]);
         if (!lookForUser) { 
             message.channel.send(`- User ${lookForUser} not found`);
             return;
          }
         
         mirrorUser.id = lookForUser.id;
-        mirrorUser.name = lookForUser.user.username;
+        mirrorUser.name = lookForUser.username;
         mirrorUser.status = true;
 
         message.channel.send(`I'll be mirroing **${mirrorUser.name}** (_${mirrorUser.style}_). To stop me from doing so, type: '!mirror -off'`);
@@ -379,7 +385,7 @@ module.exports = {
                     let current = result[0].current;
                     let location = result[0].location;
 
-                    message.channel.send(`${current.temperature} ${unidadeGraus} in ${current.observationpoint} @ ${current.observationtime}/${location.timezone}`);
+                    message.channel.send(`${current.temperature} ${unidadeGraus} in ${current.observationpoint} (at ${current.observationtime})`);
 
                     // const embed = new Discord.RichEmbed()
                     //     .setDescription(`**${current.skytext}**`)
